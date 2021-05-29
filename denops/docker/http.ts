@@ -4,8 +4,8 @@ import { connect } from "./socket.ts";
 export interface Request {
   url: string;
   method?: string;
-  header?: Record<string, string>;
-  params?: Record<string, string>;
+  header?: any;
+  params?: any;
   data?: unknown;
 }
 
@@ -22,6 +22,10 @@ export interface Error {
 interface Options {
   header?: Record<string, string>;
   params?: Record<string, unknown>;
+}
+
+function isObject(obj: unknown): obj is Object {
+  return typeof obj === "object";
 }
 
 export class HttpClient {
@@ -53,7 +57,7 @@ export class HttpClient {
     return resp;
   }
 
-  private async request<T>(req: Request): Promise<Response<T>> {
+  static newRequest(req: Request): string {
     req.method = req.method ?? "GET";
 
     let header = `${req.method} ${req.url}`;
@@ -72,11 +76,20 @@ export class HttpClient {
     let reqStr = `${header}\r\n`;
     if ("data" in req) {
       let data = req.data;
-      if (typeof req.data === "object") {
-        data = JSON.stringify(req.data);
+      if (isObject(data)) {
+        if (Object.entries(data).length) {
+          data = JSON.stringify(data);
+        } else {
+          data = "";
+        }
       }
       reqStr = `${header}\r\n${data}\r\n`;
     }
+    return reqStr;
+  }
+
+  private async request<T>(req: Request): Promise<Response<T>> {
+    const reqStr = HttpClient.newRequest(req);
 
     await this.#socket.write(new TextEncoder().encode(reqStr));
     const incomResp = await readResponse(this.#socket);
