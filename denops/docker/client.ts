@@ -33,7 +33,7 @@ export class Docker {
   }
 
   async inspectImage(name: string): Promise<InspectImage> {
-    const resp = await this.#http.get<InspectImage>(`/iamges/${name}/json`);
+    const resp = await this.#http.get<InspectImage>(`/images/${name}/json`);
     return resp.body;
   }
 
