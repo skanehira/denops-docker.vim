@@ -1,4 +1,4 @@
-import { Vim } from "https://deno.land/x/denops_std@v0.10/mod.ts";
+import { Vim } from "https://deno.land/x/denops_std@v0.11/mod.ts";
 
 export async function runTerminal(vim: Vim, cmd: string[]) {
   if (await vim.call("has", "nvim")) {

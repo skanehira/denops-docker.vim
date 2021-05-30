@@ -1,4 +1,4 @@
-import { Vim } from "https://deno.land/x/denops_std@v0.10/mod.ts";
+import { Vim } from "https://deno.land/x/denops_std@v0.11/mod.ts";
 import { HttpClient, Response } from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
