@@ -1,17 +1,26 @@
 import { main } from "https://deno.land/x/denops_std@v0.11/mod.ts";
 import { Docker } from "./client.ts";
 import { ensureString } from "./util.ts";
+import { ImageTable } from "./table.ts";
+import { BufferManager } from "./vim_buffer.ts";
+import { KeyMap } from "./vim_map.ts";
 
 main(async ({ vim }) => {
   const docker = await Docker.get(vim);
+  const bm = BufferManager.get(vim);
 
   vim.register({
     async images() {
       const images = await docker.iamges();
-      const tags = images.filter((image) => image?.RepoTags).map((image) =>
-        image.RepoTags
-      )?.flat();
-      vim.cmd("echo tags", { tags: tags });
+      const table = new ImageTable(images);
+      const buf = await bm.newBuffer({
+        name: "images",
+        opener: "tabnew",
+        buftype: "nofile",
+        maps: [new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"])],
+      });
+
+      await bm.setbufline(buf.bufnr, 1, table.toString().split("\n"));
     },
 
     async containers() {
