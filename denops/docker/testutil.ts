@@ -16,3 +16,13 @@ export async function readConn(
   await conn.read(buf);
   return new TextDecoder().decode(buf);
 }
+
+export async function readJSON<T>(file: string): Promise<T> {
+  const json = await Deno.readFile(file);
+  return JSON.parse(new TextDecoder().decode(json)) as T;
+}
+
+export async function readFile(file: string): Promise<string> {
+  const out = await Deno.readFile(file);
+  return new TextDecoder().decode(out).trimRight();
+}
