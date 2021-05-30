@@ -25,6 +25,13 @@ main(async ({ vim }) => {
       }
     },
 
+    async inspectImage(name: unknown) {
+      if (ensureString(name)) {
+        const resp = await docker.inspectImage(name);
+        console.log(resp);
+      }
+    },
+
     async attachContainer(name: unknown) {
       if (ensureString(name)) {
         await docker.attachContainer(name);

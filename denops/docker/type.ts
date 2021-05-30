@@ -93,3 +93,75 @@ export interface removeImageOpts {
   force: boolean;
   noprune: boolean;
 }
+
+export interface InspectImage {
+  Id: string;
+  Container: string;
+  Comment: string;
+  Os: string;
+  Architecture: string;
+  Parent: string;
+  ContainerConfig: ContainerConfig;
+  DockerVersion: string;
+  VirtualSize: number;
+  Size: number;
+  Author: string;
+  Created: string;
+  GraphDriver: GraphDriver;
+  RepoDigests: string[];
+  RepoTags: string[];
+  Config: Config;
+  RootFS: RootFs;
+}
+
+export interface ContainerConfig {
+  Tty: boolean;
+  Hostname: string;
+  Domainname: string;
+  AttachStdout: boolean;
+  PublishService: string;
+  AttachStdin: boolean;
+  OpenStdin: boolean;
+  StdinOnce: boolean;
+  NetworkDisabled: boolean;
+  OnBuild: any[];
+  Image: string;
+  User: string;
+  WorkingDir: string;
+  MacAddress: string;
+  AttachStderr: boolean;
+  Labels: Record<string, string>;
+  Env: string[];
+  Cmd: string[];
+}
+
+export interface GraphDriver {
+  Name: string;
+  Data: any;
+}
+
+export interface Config {
+  Image: string;
+  NetworkDisabled: boolean;
+  OnBuild: any[];
+  StdinOnce: boolean;
+  PublishService: string;
+  AttachStdin: boolean;
+  OpenStdin: boolean;
+  Domainname: string;
+  AttachStdout: boolean;
+  Tty: boolean;
+  Hostname: string;
+  Cmd: string[];
+  Env: string[];
+  Labels: Record<string, string>;
+  MacAddress: string;
+  AttachStderr: boolean;
+  WorkingDir: string;
+  User: string;
+}
+
+export interface RootFs {
+  Type: string;
+  Layers: string[];
+}

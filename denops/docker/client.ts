@@ -4,6 +4,7 @@ import { runTerminal } from "./vim_util.ts";
 import {
   Container,
   Image,
+  InspectImage,
   removeContainerOpts,
   removeImageOpts,
   SearchImage,
@@ -28,6 +29,11 @@ export class Docker {
 
   async iamges(): Promise<Image[]> {
     const resp = await this.#http.get<Image[]>("/images/json");
+    return resp.body;
+  }
+
+  async inspectImage(name: string): Promise<InspectImage> {
+    const resp = await this.#http.get<InspectImage>(`/iamges/${name}/json`);
     return resp.body;
   }
 
