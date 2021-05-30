@@ -1,6 +1,6 @@
 import { main } from "https://deno.land/x/denops_std@v0.10/mod.ts";
 import { Docker } from "./client.ts";
-import { ensureString } from "./vim_util.ts";
+import { ensureString } from "./util.ts";
 
 main(async ({ vim }) => {
   const docker = await Docker.get(vim);
