@@ -23,7 +23,8 @@ import { connect } from "./socket.ts";
 export interface Request {
   url: string;
   method?: string;
-  header?: any;
+  header?: Record<string, string>;
+  // deno-lint-ignore no-explicit-any
   params?: any;
   data?: unknown;
 }

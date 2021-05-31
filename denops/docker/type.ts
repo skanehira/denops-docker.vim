@@ -1,3 +1,4 @@
+// deno-lint-ignore-file camelcase no-explicit-any
 export interface Image {
   Id: string;
   ParentId: string;
