@@ -10,9 +10,16 @@ export async function main(denops: Denops): Promise<void> {
   const bm = BufferManager.get(denops);
   const httpClient = await HttpClient.get();
 
-  await denops.cmd(
+  const commands: string[] = [
     `command! DockerImages call denops#notify("${denops.name}", "images", [])`,
-  );
+    `command! DockerContainers call denops#notify("${denops.name}", "containers", [])`,
+    `command! -nargs=1 DockerStartContainer call denops#notify("${denops.name}", "startContainer", [<q-args>])`,
+    `command! -nargs=1 DockerStopContainer call denops#notify("${denops.name}", "stopContainerimages", [<q-args>])`,
+  ];
+
+  commands.forEach((cmd) => {
+    denops.cmd(cmd);
+  });
 
   denops.dispatcher = {
     async images() {
@@ -52,7 +59,7 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async upContainer(name: unknown) {
+    async startContainer(name: unknown) {
       if (ensureString(name)) {
         console.log(`starting ${name}`);
         await docker.upContainer(httpClient, name);
