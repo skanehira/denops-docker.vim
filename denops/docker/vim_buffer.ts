@@ -1,4 +1,5 @@
-import { Vim } from "https://deno.land/x/denops_std@v0.11/mod.ts";
+import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
+import * as fn from "https://deno.land/x/denops_std/function/mod.ts";
 import { KeyMap } from "./vim_map.ts";
 
 export type buftype =
@@ -35,16 +36,16 @@ export interface NewBufferOpts {
 }
 
 export class BufferManager {
-  #vim: Vim;
+  #denops: Denops;
   #buffers: Record<number, Buffer> = {};
 
   private static instance?: BufferManager;
 
-  constructor(vim: Vim) {
-    this.#vim = vim;
+  constructor(vim: Denops) {
+    this.#denops = vim;
   }
 
-  static get(vim: Vim): BufferManager {
+  static get(vim: Denops): BufferManager {
     if (!BufferManager.instance) {
       BufferManager.instance = new BufferManager(vim);
     }
@@ -60,34 +61,34 @@ export class BufferManager {
       ctx["name"] = opts.name;
     }
 
-    await this.#vim.cmd(cmd.join(" "), ctx);
+    await this.#denops.cmd(cmd.join(" "), ctx);
     if (opts?.name) {
-      buffer.bufnr = await this.#vim.fn.bufnr(opts.name);
+      buffer.bufnr = await fn.bufnr(this.#denops, opts.name);
       buffer.name = opts.name;
     } else {
-      buffer.bufnr = await this.#vim.call("bufnr") as number;
+      buffer.bufnr = await this.#denops.call("bufnr") as number;
     }
 
     if (opts?.ft) {
       buffer.ft = opts.ft;
-      await this.#vim.cmd(`setlocal ft=${opts.ft}`);
+      await this.#denops.cmd(`setlocal ft=${opts.ft}`);
     }
 
     if (opts?.buftype) {
       buffer.buftype = opts.buftype;
-      await this.#vim.cmd(`setlocal buftype=${opts.buftype}`);
+      await this.#denops.cmd(`setlocal buftype=${opts.buftype}`);
     }
 
     if (opts?.swapfile) {
       buffer.swapfile = opts.swapfile;
-      await this.#vim.cmd(`setlocal v`, {
+      await this.#denops.cmd(`setlocal v`, {
         v: opts.swapfile ? "swapfile" : "noswapfile",
       });
     }
 
     if (opts?.wrap) {
       buffer.wrap = opts.wrap;
-      await this.#vim.cmd(`setlocal v`, {
+      await this.#denops.cmd(`setlocal v`, {
         v: opts.wrap ? "wrap" : "nowrap",
       });
     }
@@ -111,20 +112,20 @@ export class BufferManager {
   }
 
   async bwipeout(buf: number) {
-    await this.#vim.cmd("bw buf", { buf: buf });
+    await this.#denops.cmd("bw buf", { buf: buf });
     this.removeBuffers(buf);
   }
 
   async addKeyMap(buf: number, map: KeyMap) {
-    const curbuf = this.#vim.call("bufnr");
+    const curbuf = this.#denops.call("bufnr");
     try {
-      await this.#vim.cmd(
+      await this.#denops.cmd(
         `noautocmd keepalt keepjumps silent buffer ${buf} | ${map.toString()}`,
       );
     } catch (e) {
       throw e;
     } finally {
-      await this.#vim.cmd(
+      await this.#denops.cmd(
         `noautocmd keepalt keepjumps silent buffer ${curbuf}`,
       );
     }
@@ -135,7 +136,7 @@ export class BufferManager {
     start: number,
     end?: number,
   ): Promise<string[]> {
-    return await this.#vim.call(
+    return await this.#denops.call(
       "getbufline",
       buf,
       start,
@@ -144,6 +145,6 @@ export class BufferManager {
   }
 
   async setbufline(buf: number, start: number, text: string[]) {
-    await this.#vim.call("setbufline", buf, start, text);
+    await this.#denops.call("setbufline", buf, start, text);
   }
 }
