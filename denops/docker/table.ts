@@ -19,7 +19,7 @@ export class ImageTable {
           image.Id.substring(7, 19),
           repo,
           tag,
-          new Date(image.Created).toISOString(),
+          new Date(image.Created * 1000).toISOString(),
           formatBytes(image.Size),
         ];
         body.push(line);

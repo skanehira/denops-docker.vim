@@ -1,11 +1,11 @@
-import { Vim } from "https://deno.land/x/denops_std@v0.11/mod.ts";
+import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
 
-export async function runTerminal(vim: Vim, cmd: string[]) {
-  if (await vim.call("has", "nvim")) {
-    await vim.cmd("new");
-    await vim.call("termopen", cmd);
+export async function runTerminal(denops: Denops, cmd: string[]) {
+  if (await denops.call("has", "nvim")) {
+    await denops.cmd("new");
+    await denops.call("termopen", cmd);
   } else {
-    await vim.cmd(`terminal ++shell ${cmd.join(" ")}`);
-    await vim.cmd("nnoremap <buffer> <silent> <CR> :bw<CR>");
+    await denops.cmd(`terminal ++shell ${cmd.join(" ")}`);
+    await denops.cmd("nnoremap <buffer> <silent> <CR> :bw<CR>");
   }
 }
