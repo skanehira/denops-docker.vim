@@ -100,7 +100,7 @@ export async function main(denops: Denops): Promise<void> {
           ),
           new KeyMap(
             "nnoremap",
-            "<C-l>",
+            "l",
             `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
