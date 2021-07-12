@@ -86,9 +86,5 @@ export async function removeImage(httpClient: HttpClient, name: string) {
 
 export async function removeContainer(httpClient: HttpClient, name: string) {
   const resp = await docker.removeContainer(httpClient, name);
-  if (resp.status >= 300) {
-    console.log(`failed to remove ${name}`);
-  } else {
-    console.log(`removed ${name}`);
-  }
+  return resp.status <= 300;
 }

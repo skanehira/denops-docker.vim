@@ -10,6 +10,7 @@ import {
   getContainers,
   getImages,
   quickrunImage,
+  removeContainer,
   startContainer,
   stopContainer,
 } from "./action.ts";
@@ -103,6 +104,12 @@ export async function main(denops: Denops): Promise<void> {
             `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
+          new KeyMap(
+            "nnoremap",
+            "<C-d>",
+            `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
         ],
       });
 
@@ -191,9 +198,19 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async removeContainer(name: unknown) {
-      if (ensureString(name)) {
-        await docker.removeContainer(httpClient, name);
+    async removeContainer() {
+      const name = await getName(bm, containerBuffer.bufnr);
+      const input = await denops.eval(
+        `input("Do you want to remove ${name}?(y/n): ")`,
+      ) as string;
+      if (input && input === "y" || input === "Y") {
+        if (await removeContainer(httpClient, name)) {
+          console.log(`removed ${name}`);
+          const containers = await getContainers(httpClient);
+          await bm.setbufline(containerBuffer.bufnr, 1, containers);
+        }
+      } else {
+        console.log("canceled");
       }
     },
   };
