@@ -112,7 +112,7 @@ export class BufferManager {
   }
 
   async addKeyMap(buf: number, map: KeyMap) {
-    const curbuf = this.#denops.call("bufnr");
+    const curbuf = await this.#denops.call("bufnr");
     try {
       await this.#denops.cmd(
         `noautocmd keepalt keepjumps silent buffer ${buf} | ${map.toString()}`,
