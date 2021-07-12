@@ -49,7 +49,6 @@ function makeImageTable(images: Image[]): string[] {
 function makeContainerTable(containers: Container[]): string[] {
   const body = new Array<Array<string>>();
   containers.forEach((container) => {
-    console.log(Deno.inspect(container.Ports));
     const line = [
       container.Id.substring(0, 12),
       container.Names[0].substring(1),
