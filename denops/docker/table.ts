@@ -52,7 +52,7 @@ function makeContainerTable(containers: Container[]): string[] {
     console.log(Deno.inspect(container.Ports));
     const line = [
       container.Id.substring(0, 12),
-      container.Names[0],
+      container.Names[0].substring(1),
       container.Image,
       container.Status,
       new Date(container.Created * 1000).toISOString(),
