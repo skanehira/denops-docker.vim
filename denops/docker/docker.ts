@@ -81,8 +81,9 @@ export async function quickrunImage(denops: Denops, name: string) {
     "run",
     "--rm",
     "-it",
-    name,
+    "--entrypoint",
     "sh",
+    name,
     "-c",
     "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh",
   ];
