@@ -91,6 +91,12 @@ export async function main(denops: Denops): Promise<void> {
             `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
+          new KeyMap(
+            "nnoremap",
+            "<C-l>",
+            `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
         ],
       });
 
@@ -158,6 +164,12 @@ export async function main(denops: Denops): Promise<void> {
         const containers = await getContainers(httpClient);
         await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
+    },
+
+    async tailContainerLogs() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      await docker.tailContainerLogs(denops, name);
     },
 
     async searchImage(name: unknown) {

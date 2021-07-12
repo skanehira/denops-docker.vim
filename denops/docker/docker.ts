@@ -124,6 +124,16 @@ export async function execContainer(
   await runTerminal(denops, cmd);
 }
 
+export async function tailContainerLogs(denops: Denops, name: string) {
+  const cmd = <string[]> [
+    "docker",
+    "logs",
+    "-f",
+    name,
+  ];
+  await runTerminal(denops, cmd);
+}
+
 export async function startContainer(
   cli: HttpClient,
   name: string,

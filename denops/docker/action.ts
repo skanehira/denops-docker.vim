@@ -37,6 +37,13 @@ export async function execContainer(
   await docker.execContainer(denops, name, command, args);
 }
 
+export async function tailContainerLogs(
+  denops: Denops,
+  name: string,
+) {
+  await docker.tailContainerLogs(denops, name);
+}
+
 export async function startContainer(
   httpClient: HttpClient,
   name: string,
