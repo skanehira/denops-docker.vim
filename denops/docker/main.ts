@@ -15,6 +15,8 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerContainers call denops#notify("${denops.name}", "containers", [])`,
     `command! -nargs=1 DockerStartContainer call denops#notify("${denops.name}", "startContainer", [<q-args>])`,
     `command! -nargs=1 DockerStopContainer call denops#notify("${denops.name}", "stopContainerimages", [<q-args>])`,
+    `command! -nargs=1 DockerQuickrunImage call denops#notify("${denops.name}", "quickrunImage", [<q-args>])`,
+    `command! -nargs=1 DockerAttachContainer call denops#notify("${denops.name}", "attachContainer", [<q-args>])`,
   ];
 
   commands.forEach((cmd) => {

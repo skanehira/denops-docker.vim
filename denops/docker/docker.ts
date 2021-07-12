@@ -79,16 +79,13 @@ export async function quickrunImage(denops: Denops, name: string) {
   const cmd = <string[]> [
     "docker",
     "run",
+    "--rm",
     "-it",
-    "--entrypoint",
-    "sh",
     name,
+    "sh",
     "-c",
-    `"[ -e /bin/bash ] && /bin/bash || sh"`,
+    "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh",
   ];
-  if (await denops.call("has", "nvim")) {
-    cmd[cmd.length - 1] = `[ -e /bin/bash ] && /bin/bash || sh`;
-  }
   await runTerminal(denops, cmd);
 }
 
@@ -100,11 +97,8 @@ export async function attachContainer(denops: Denops, name: string) {
     name,
     "sh",
     "-c",
-    `"[ -e /bin/bash ] && /bin/bash || sh"`,
+    "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh",
   ];
-  if (await denops.call("has", "nvim")) {
-    cmd[cmd.length - 1] = `[ -e /bin/bash ] && /bin/bash || sh`;
-  }
   await runTerminal(denops, cmd);
 }
 
