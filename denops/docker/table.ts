@@ -1,4 +1,4 @@
-import { Container, Image } from "./type.ts";
+import { Container, Image } from "./types.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.19.0/table/mod.ts";
 import { formatBytes } from "./util.ts";
 
