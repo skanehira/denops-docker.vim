@@ -8,7 +8,7 @@ import {
   removeContainerOpts,
   removeImageOpts,
   SearchImage,
-} from "./type.ts";
+} from "./types.ts";
 
 export async function images(cli: HttpClient): Promise<Image[]> {
   const resp = await cli.get<Image[]>("/images/json");
