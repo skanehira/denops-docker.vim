@@ -12,14 +12,14 @@ export type buftype =
 
 export type bufhidden = "hide" | "unload" | "delete" | "wipe";
 
-interface Buffer {
+export interface Buffer {
   name?: string;
   ft?: string;
   bufnr: number;
   buftype?: buftype;
   bufhidden?: bufhidden;
   swapfile: boolean;
-  wrap: boolean;
+  wrap: "wrap" | "nowrap";
   modifiable: boolean;
 }
 
@@ -30,7 +30,7 @@ export interface NewBufferOpts {
   buftype?: buftype;
   bufhidden?: bufhidden;
   swapfile?: boolean;
-  wrap?: boolean;
+  wrap?: "wrap" | "nowrap";
   modifiable?: boolean;
   maps?: KeyMap[];
 }
@@ -80,18 +80,13 @@ export class BufferManager {
     }
 
     if (opts?.swapfile) {
-      buffer.swapfile = opts.swapfile;
       await this.#denops.cmd(`setlocal v`, {
         v: opts.swapfile ? "swapfile" : "noswapfile",
       });
     }
 
-    if (opts?.wrap) {
-      buffer.wrap = opts.wrap;
-      await this.#denops.cmd(`setlocal v`, {
-        v: opts.wrap ? "wrap" : "nowrap",
-      });
-    }
+    buffer.wrap = opts?.wrap ?? "nowrap";
+    await this.#denops.cmd(`setlocal ${buffer.wrap}`);
 
     if (opts?.maps) {
       opts?.maps.forEach(async (map) => {
@@ -144,7 +139,25 @@ export class BufferManager {
     ) as string[];
   }
 
-  async setbufline(buf: number, start: number, text: string[]) {
-    await this.#denops.call("setbufline", buf, start, text);
+  async setbufline(buf: number, start: number | string, text: string[]) {
+    const cursor = await this.#denops.call("getcurpos");
+    await this.#denops.cmd(
+      `silent call deletebufline(${buf}, ${start}, "$")`,
+    );
+    await this.#denops.eval(`setbufline(${buf}, ${start}, text)`, {
+      text: text,
+    });
+    await this.#denops.call("setpos", ".", cursor);
+  }
+
+  async deletebufline(buf: number, start: number, end?: number | string) {
+    await this.#denops.cmd(`call deletebufline(${buf}, ${start}, "${end}")`);
+  }
+
+  async getbufcurrentline(buf: number): Promise<string> {
+    const lines = await this.#denops.eval(
+      `getbufline(${buf}, line("."))`,
+    ) as string[];
+    return lines[0];
   }
 }

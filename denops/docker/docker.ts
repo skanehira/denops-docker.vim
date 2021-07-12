@@ -41,14 +41,15 @@ export async function removeContainer(
   cli: HttpClient,
   name: string,
   opts: removeContainerOpts = { v: false, force: false, link: false },
-) {
-  await cli.delete(`/containers/${name}`, {
+): Promise<Response> {
+  const resp = await cli.delete(`/containers/${name}`, {
     params: {
       v: opts.v,
       force: opts.force,
       link: opts.link,
     },
   });
+  return resp;
 }
 
 export async function containers(cli: HttpClient): Promise<Container[]> {
@@ -81,6 +82,7 @@ export async function quickrunImage(denops: Denops, name: string) {
     "run",
     "--rm",
     "-it",
+    "--detach-keys=ctrl-\\",
     "--entrypoint",
     "sh",
     name,
@@ -95,6 +97,7 @@ export async function attachContainer(denops: Denops, name: string) {
     "docker",
     "exec",
     "-it",
+    "--detach-keys=ctrl-\\",
     name,
     "sh",
     "-c",
@@ -103,15 +106,36 @@ export async function attachContainer(denops: Denops, name: string) {
   await runTerminal(denops, cmd);
 }
 
-export async function upContainer(
+export async function execContainer(
+  denops: Denops,
+  name: string,
+  command: string,
+  args: string[],
+) {
+  const cmd = <string[]> [
+    "docker",
+    "exec",
+    "-it",
+    "--detach-keys=ctrl-\\",
+    name,
+    command,
+  ];
+  cmd.push(...args);
+  await runTerminal(denops, cmd);
+}
+
+export async function startContainer(
   cli: HttpClient,
   name: string,
 ): Promise<Response> {
   return await cli.post(`/containers/${name}/start`);
 }
 
-export async function stopContainer(cli: HttpClient, name: string) {
-  await cli.post(`/containers/${name}/stop`);
+export async function stopContainer(
+  cli: HttpClient,
+  name: string,
+): Promise<Response> {
+  return await cli.post(`/containers/${name}/stop`);
 }
 
 export async function killContainer(

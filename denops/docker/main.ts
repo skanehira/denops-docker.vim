@@ -2,9 +2,17 @@ import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { ensureString } from "./util.ts";
-import { makeTableString } from "./table.ts";
-import { BufferManager } from "./vim_buffer.ts";
+import { Buffer, BufferManager } from "./vim_buffer.ts";
 import { KeyMap } from "./vim_map.ts";
+import {
+  attachContainer,
+  execContainer,
+  getContainers,
+  getImages,
+  quickrunImage,
+  startContainer,
+  stopContainer,
+} from "./action.ts";
 
 export async function main(denops: Denops): Promise<void> {
   const bm = BufferManager.get(denops);
@@ -13,8 +21,6 @@ export async function main(denops: Denops): Promise<void> {
   const commands: string[] = [
     `command! DockerImages call denops#notify("${denops.name}", "images", [])`,
     `command! DockerContainers call denops#notify("${denops.name}", "containers", [])`,
-    `command! -nargs=1 DockerStartContainer call denops#notify("${denops.name}", "startContainer", [<q-args>])`,
-    `command! -nargs=1 DockerStopContainer call denops#notify("${denops.name}", "stopContainerimages", [<q-args>])`,
     `command! -nargs=1 DockerQuickrunImage call denops#notify("${denops.name}", "quickrunImage", [<q-args>])`,
     `command! -nargs=1 DockerAttachContainer call denops#notify("${denops.name}", "attachContainer", [<q-args>])`,
   ];
@@ -23,31 +29,72 @@ export async function main(denops: Denops): Promise<void> {
     denops.cmd(cmd);
   });
 
+  let containerBuffer = {} as Buffer;
+  let imageBuffer = {} as Buffer;
+
   denops.dispatcher = {
     async images() {
-      const images = await docker.images(httpClient);
-      const table = makeTableString(images);
-      const buf = await bm.newBuffer({
+      const images = await getImages(httpClient);
+      imageBuffer = await bm.newBuffer({
         name: "images",
         opener: "tabnew",
         buftype: "nofile",
-        maps: [new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"])],
+        maps: [
+          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"]),
+          new KeyMap(
+            "nnoremap",
+            "r",
+            `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+        ],
       });
-
-      await bm.setbufline(buf.bufnr, 1, table);
+      await bm.setbufline(imageBuffer.bufnr, 1, images);
     },
 
     async containers() {
-      const containers = await docker.containers(httpClient);
-      const table = makeTableString(containers);
-      const buf = await bm.newBuffer({
+      const containers = await getContainers(httpClient);
+      containerBuffer = await bm.newBuffer({
         name: "containers",
         opener: "tabnew",
         buftype: "nofile",
-        maps: [new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"])],
+        wrap: "nowrap",
+        maps: [
+          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"]),
+          new KeyMap(
+            "nnoremap",
+            "u",
+            `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "d",
+            `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "f",
+            `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "a",
+            `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "e",
+            `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+        ],
       });
 
-      await bm.setbufline(buf.bufnr, 1, table);
+      await bm.setbufline(containerBuffer.bufnr, 1, containers);
     },
 
     async pullImage(name: unknown) {
@@ -63,33 +110,53 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async attachContainer(name: unknown) {
-      if (ensureString(name)) {
-        await docker.attachContainer(denops, name);
+    async attachContainer() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      await attachContainer(denops, name);
+    },
+
+    async execContainer() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      const input = await denops.eval(`input("command: ")`) as string;
+      if (input) {
+        const parts = input.split(" ");
+        const cmd = parts.shift() as string;
+        const args = parts;
+        await execContainer(denops, name, cmd, args);
+      } else {
+        console.log("canceled");
       }
     },
 
-    async startContainer(name: unknown) {
-      if (ensureString(name)) {
-        console.log(`starting ${name}`);
-        await docker.upContainer(httpClient, name);
+    async startContainer() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      if (await startContainer(httpClient, name)) {
         console.log(`started ${name}`);
+        const containers = await getContainers(httpClient);
+        await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
 
-    async stopContainer(name: unknown) {
-      if (ensureString(name)) {
-        console.log(`stopping ${name}`);
-        await docker.stopContainer(httpClient, name);
-        console.log(`stopped ${name}`);
+    async stopContainer() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      if (await stopContainer(httpClient, name)) {
+        console.log(`stoped ${name}`);
+        const containers = await getContainers(httpClient);
+        await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
 
-    async killContainer(name: unknown) {
-      if (ensureString(name)) {
-        console.log(`kill ${name}`);
-        await docker.killContainer(httpClient, name);
+    async killContainer() {
+      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
+        const containers = await getContainers(httpClient);
+        await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
 
@@ -101,10 +168,10 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async quickrunImage(name: unknown) {
-      if (ensureString(name)) {
-        await docker.quickrunImage(denops, name);
-      }
+    async quickrunImage() {
+      const line = await bm.getbufcurrentline(imageBuffer.bufnr);
+      const [_, name] = line.split(" ", 2);
+      await quickrunImage(denops, name);
     },
 
     async removeImage(name: unknown) {
