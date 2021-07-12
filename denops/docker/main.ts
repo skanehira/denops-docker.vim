@@ -14,6 +14,12 @@ import {
   stopContainer,
 } from "./action.ts";
 
+async function getName(bm: BufferManager, bufnr: number): Promise<string> {
+  const line = await bm.getbufcurrentline(bufnr);
+  const [_, name] = line.split(" ", 2);
+  return name;
+}
+
 export async function main(denops: Denops): Promise<void> {
   const bm = BufferManager.get(denops);
   const httpClient = await HttpClient.get();
@@ -117,14 +123,12 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async attachContainer() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       await attachContainer(denops, name);
     },
 
     async execContainer() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       const input = await denops.eval(`input("command: ")`) as string;
       if (input) {
         const parts = input.split(" ");
@@ -137,8 +141,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async startContainer() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       if (await startContainer(httpClient, name)) {
         console.log(`started ${name}`);
         const containers = await getContainers(httpClient);
@@ -147,8 +150,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async stopContainer() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       if (await stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
         const containers = await getContainers(httpClient);
@@ -157,8 +159,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async killContainer() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
         const containers = await getContainers(httpClient);
@@ -167,8 +168,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async tailContainerLogs() {
-      const line = await bm.getbufcurrentline(containerBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, containerBuffer.bufnr);
       await docker.tailContainerLogs(denops, name);
     },
 
@@ -181,8 +181,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async quickrunImage() {
-      const line = await bm.getbufcurrentline(imageBuffer.bufnr);
-      const [_, name] = line.split(" ", 2);
+      const name = await getName(bm, imageBuffer.bufnr);
       await quickrunImage(denops, name);
     },
 
