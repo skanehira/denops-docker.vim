@@ -1,4 +1,4 @@
-import { Container, Image } from "./types.ts";
+import type { Container, Image, Port } from "./types.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.19.0/table/mod.ts";
 import { formatBytes } from "./util.ts";
 
@@ -22,8 +22,6 @@ export function makeTableString(data: unknown): string[] {
 }
 
 function makeImageTable(images: Image[]): string[] {
-  // column is
-  // ID, REPOSITORY, TAG, CREATED, SIZE
   const body = new Array<Array<string | number>>();
   images.forEach((image) => {
     image.RepoTags?.forEach((v) => {
@@ -49,26 +47,34 @@ function makeImageTable(images: Image[]): string[] {
 }
 
 function makeContainerTable(containers: Container[]): string[] {
-  // column is
-  // ID, NAME, IMAGE, STATUS, CREATED, PORT
   const body = new Array<Array<string>>();
   containers.forEach((container) => {
+    console.log(Deno.inspect(container.Ports));
     const line = [
-      container.Id.substring(7, 19),
+      container.Id.substring(0, 12),
       container.Names[0],
       container.Image,
       container.Status,
       new Date(container.Created * 1000).toISOString(),
-      container.Ports.join(" ").toString(),
+      container.Ports.map((port) => {
+        return portString(port);
+      }).join(", "),
     ];
     body.push(line);
   });
 
-  const header = ["ID", "NAME", "IMAGE", "STATUS", "CREATED", "PORT"];
+  const header = ["ID", "NAME", "IMAGE", "STATUS", "CREATED", "PORTS"];
 
   const table = new Table();
   table.header(header)
     .body(body);
 
   return table.toString().split("\n");
+}
+
+function portString(port: Port): string {
+  const exposed = `PublicPort` in port;
+  return exposed
+    ? `${port.IP}:${port.PublicPort}->${port.PrivatePort}/${port.Type}`
+    : `${port.PrivatePort}/${port.Type}`;
 }

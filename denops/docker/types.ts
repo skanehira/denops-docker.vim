@@ -31,8 +31,9 @@ export interface Container {
 }
 
 export interface Port {
+  IP?: string;
+  PublicPort?: number;
   PrivatePort: number;
-  PublicPort: number;
   Type: string;
 }
 
