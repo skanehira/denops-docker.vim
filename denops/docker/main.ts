@@ -2,7 +2,7 @@ import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { ensureString } from "./util.ts";
-import { ImageTable } from "./table.ts";
+import { makeTableString } from "./table.ts";
 import { BufferManager } from "./vim_buffer.ts";
 import { KeyMap } from "./vim_map.ts";
 
@@ -24,7 +24,7 @@ export async function main(denops: Denops): Promise<void> {
   denops.dispatcher = {
     async images() {
       const images = await docker.images(httpClient);
-      const table = new ImageTable(images);
+      const table = makeTableString(images);
       const buf = await bm.newBuffer({
         name: "images",
         opener: "tabnew",
@@ -32,12 +32,20 @@ export async function main(denops: Denops): Promise<void> {
         maps: [new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"])],
       });
 
-      await bm.setbufline(buf.bufnr, 1, table.toString().split("\n"));
+      await bm.setbufline(buf.bufnr, 1, table);
     },
 
     async containers() {
       const containers = await docker.containers(httpClient);
-      console.log(containers);
+      const table = makeTableString(containers);
+      const buf = await bm.newBuffer({
+        name: "containers",
+        opener: "tabnew",
+        buftype: "nofile",
+        maps: [new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"])],
+      });
+
+      await bm.setbufline(buf.bufnr, 1, table);
     },
 
     async pullImage(name: unknown) {
