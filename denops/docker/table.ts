@@ -52,7 +52,9 @@ function makeContainerTable(containers: Container[]): string[] {
     const line = [
       container.Id.substring(0, 12),
       container.Names[0].substring(1),
-      container.Image,
+      container.Image.length > 20
+        ? `${container.Image.substring(0, 20)}...`
+        : container.Image,
       container.Status,
       new Date(container.Created * 1000).toISOString(),
       container.Ports.map((port) => {
