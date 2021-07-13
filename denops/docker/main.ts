@@ -54,7 +54,6 @@ export async function main(denops: Denops): Promise<void> {
         bm.openBuffer(containerBuffer.bufnr);
         return;
       }
-      const images = await getImages(httpClient);
       imageBuffer = await bm.newBuffer({
         name: "images",
         opener: "tabnew",
@@ -69,6 +68,7 @@ export async function main(denops: Denops): Promise<void> {
           ),
         ],
       });
+      const images = await getImages(httpClient);
       await bm.setbufline(imageBuffer.bufnr, 1, images);
     },
 
@@ -77,7 +77,6 @@ export async function main(denops: Denops): Promise<void> {
         bm.openBuffer(containerBuffer.bufnr);
         return;
       }
-      const containers = await getContainers(httpClient);
       containerBuffer = await bm.newBuffer({
         name: "containers",
         opener: "tabnew",
@@ -130,6 +129,7 @@ export async function main(denops: Denops): Promise<void> {
         ],
       });
 
+      const containers = await getContainers(httpClient);
       await bm.setbufline(containerBuffer.bufnr, 1, containers);
 
       intervalTimerID = setInterval(() => {
