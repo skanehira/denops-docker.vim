@@ -46,10 +46,14 @@ export async function main(denops: Denops): Promise<void> {
   });
 
   let containerBuffer = { bufnr: -1 } as Buffer;
-  let imageBuffer = {} as Buffer;
+  let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
     async images() {
+      if (await bm.bufexists(containerBuffer.bufnr)) {
+        bm.openBuffer(containerBuffer.bufnr);
+        return;
+      }
       const images = await getImages(httpClient);
       imageBuffer = await bm.newBuffer({
         name: "images",
@@ -179,6 +183,7 @@ export async function main(denops: Denops): Promise<void> {
 
     async startContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
+      console.log(`starting ${name}`);
       if (await startContainer(httpClient, name)) {
         console.log(`started ${name}`);
         const containers = await getContainers(httpClient);
@@ -188,6 +193,7 @@ export async function main(denops: Denops): Promise<void> {
 
     async stopContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
+      console.log(`stopping ${name}`);
       if (await stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
         const containers = await getContainers(httpClient);
@@ -197,6 +203,7 @@ export async function main(denops: Denops): Promise<void> {
 
     async killContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
+      console.log(`killing ${name}`);
       if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
         const containers = await getContainers(httpClient);
