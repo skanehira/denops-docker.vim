@@ -59,7 +59,7 @@ export async function main(denops: Denops): Promise<void> {
         opener: "tabnew",
         buftype: "nofile",
         maps: [
-          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"]),
+          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
           new KeyMap(
             "nnoremap",
             "r",
@@ -83,7 +83,7 @@ export async function main(denops: Denops): Promise<void> {
         buftype: "nofile",
         wrap: "nowrap",
         maps: [
-          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>"]),
+          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
           new KeyMap(
             "nnoremap",
             "u",
