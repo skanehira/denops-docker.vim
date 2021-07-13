@@ -98,6 +98,17 @@ export class BufferManager {
     return buffer;
   }
 
+  async bufexists(bufnr: number): Promise<boolean> {
+    if (bufnr === -1) {
+      return false;
+    }
+    return await this.#denops.call("bufexists", bufnr) as boolean;
+  }
+
+  openBuffer(bufnr: number) {
+    this.#denops.cmd(`sb ${bufnr}`);
+  }
+
   addBuffers(buffer: Buffer) {
     this.#buffers[buffer.bufnr] = buffer;
   }
@@ -128,15 +139,11 @@ export class BufferManager {
 
   async getbufline(
     buf: number,
-    start: number,
-    end?: number,
+    start: number | string,
+    end?: number | string,
   ): Promise<string[]> {
-    return await this.#denops.call(
-      "getbufline",
-      buf,
-      start,
-      end ?? start,
-    ) as string[];
+    const args = [buf, start, end].filter((v) => v !== undefined).join(", ");
+    return await this.#denops.eval(`getbufline(${args})`) as string[];
   }
 
   async setbufline(buf: number, start: number | string, text: string[]) {
@@ -152,12 +159,5 @@ export class BufferManager {
 
   async deletebufline(buf: number, start: number, end?: number | string) {
     await this.#denops.cmd(`call deletebufline(${buf}, ${start}, "${end}")`);
-  }
-
-  async getbufcurrentline(buf: number): Promise<string> {
-    const lines = await this.#denops.eval(
-      `getbufline(${buf}, line("."))`,
-    ) as string[];
-    return lines[0];
   }
 }

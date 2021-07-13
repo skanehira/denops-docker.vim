@@ -1,4 +1,5 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
+import * as autocmd from "https://deno.land/x/denops_std@v1.0.0-beta.8/autocmd/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { ensureString } from "./util.ts";
@@ -16,27 +17,35 @@ import {
 } from "./action.ts";
 
 async function getName(bm: BufferManager, bufnr: number): Promise<string> {
-  const line = await bm.getbufcurrentline(bufnr);
-  const [_, name] = line.split(" ", 2);
+  const line = await bm.getbufline(bufnr, 'line(".")');
+  const [_, name] = line[0].split(" ", 2);
   return name;
+}
+
+async function updateContainerBuffer(
+  bufnr: number,
+  bm: BufferManager,
+  httpClient: HttpClient,
+) {
+  const containers = await getContainers(httpClient);
+  await bm.setbufline(bufnr, 1, containers);
 }
 
 export async function main(denops: Denops): Promise<void> {
   const bm = BufferManager.get(denops);
   const httpClient = await HttpClient.get();
+  let intervalTimerID = 0;
 
   const commands: string[] = [
     `command! DockerImages call denops#notify("${denops.name}", "images", [])`,
     `command! DockerContainers call denops#notify("${denops.name}", "containers", [])`,
-    `command! -nargs=1 DockerQuickrunImage call denops#notify("${denops.name}", "quickrunImage", [<q-args>])`,
-    `command! -nargs=1 DockerAttachContainer call denops#notify("${denops.name}", "attachContainer", [<q-args>])`,
   ];
 
   commands.forEach((cmd) => {
     denops.cmd(cmd);
   });
 
-  let containerBuffer = {} as Buffer;
+  let containerBuffer = { bufnr: -1 } as Buffer;
   let imageBuffer = {} as Buffer;
 
   denops.dispatcher = {
@@ -60,6 +69,10 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async containers() {
+      if (await bm.bufexists(containerBuffer.bufnr)) {
+        bm.openBuffer(containerBuffer.bufnr);
+        return;
+      }
       const containers = await getContainers(httpClient);
       containerBuffer = await bm.newBuffer({
         name: "containers",
@@ -114,6 +127,23 @@ export async function main(denops: Denops): Promise<void> {
       });
 
       await bm.setbufline(containerBuffer.bufnr, 1, containers);
+
+      intervalTimerID = setInterval(() => {
+        updateContainerBuffer(containerBuffer.bufnr, bm, httpClient);
+      }, 5000);
+
+      await autocmd.group(denops, "denops_docker", (helper) => {
+        helper.define(
+          "BufWipeout",
+          "<buffer>",
+          `call denops#notify("${denops.name}", "clearInterval", [])`,
+        );
+      });
+    },
+
+    clearInterval() {
+      clearInterval(intervalTimerID);
+      return Promise.resolve();
     },
 
     async pullImage(name: unknown) {
