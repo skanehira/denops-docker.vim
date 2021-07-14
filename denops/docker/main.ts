@@ -70,6 +70,14 @@ export async function main(denops: Denops): Promise<void> {
       });
       const images = await getImages(httpClient);
       await bm.setbufline(imageBuffer.bufnr, 1, images);
+
+      await autocmd.group(denops, "denops_docker_images", (helper) => {
+        helper.define(
+          "BufWipeout",
+          "<buffer>",
+          `call denops#notify("${denops.name}", "beforeImagesBufferDelete", [])`,
+        );
+      });
     },
 
     async containers() {
@@ -136,17 +144,23 @@ export async function main(denops: Denops): Promise<void> {
         updateContainerBuffer(containerBuffer.bufnr, bm, httpClient);
       }, 5000);
 
-      await autocmd.group(denops, "denops_docker", (helper) => {
+      await autocmd.group(denops, "denops_docker_containers", (helper) => {
         helper.define(
           "BufWipeout",
           "<buffer>",
-          `call denops#notify("${denops.name}", "clearInterval", [])`,
+          `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
         );
       });
     },
 
-    clearInterval() {
+    beforeContainersBufferDelete() {
       clearInterval(intervalTimerID);
+      containerBuffer = { bufnr: -1 } as Buffer;
+      return Promise.resolve();
+    },
+
+    beforeImagesBufferDelete() {
+      imageBuffer = { bufnr: -1 } as Buffer;
       return Promise.resolve();
     },
 
