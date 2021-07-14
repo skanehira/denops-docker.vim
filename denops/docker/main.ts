@@ -56,7 +56,7 @@ export async function main(denops: Denops): Promise<void> {
       }
       imageBuffer = await bm.newBuffer({
         name: "images",
-        opener: "tabnew",
+        opener: "drop",
         buftype: "nofile",
         maps: [
           new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
@@ -87,7 +87,7 @@ export async function main(denops: Denops): Promise<void> {
       }
       containerBuffer = await bm.newBuffer({
         name: "containers",
-        opener: "tabnew",
+        opener: "drop",
         buftype: "nofile",
         wrap: "nowrap",
         maps: [

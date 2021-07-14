@@ -94,6 +94,8 @@ export class BufferManager {
       });
     }
 
+    await this.#denops.cmd(`setlocal bufhidden=hide`);
+
     this.addBuffers(buffer);
     return buffer;
   }
