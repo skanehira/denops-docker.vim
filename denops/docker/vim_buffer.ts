@@ -78,9 +78,8 @@ export class BufferManager {
     }
 
     if (opts?.swapfile) {
-      await this.#denops.cmd(`setlocal v`, {
-        v: opts.swapfile ? "swapfile" : "noswapfile",
-      });
+      const swap = opts.swapfile ? "swapfile" : "noswapfile";
+      await this.#denops.cmd(`setlocal ${swap}`);
     }
 
     buffer.wrap = opts?.wrap ?? "nowrap";
