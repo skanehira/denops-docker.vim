@@ -4,7 +4,6 @@ import { runTerminal } from "./vim_util.ts";
 import {
   Container,
   Image,
-  InspectImage,
   removeContainerOpts,
   removeImageOpts,
   SearchImage,
@@ -16,11 +15,12 @@ export async function images(cli: HttpClient): Promise<Image[]> {
 }
 
 export async function inspectImage(
-  cli: HttpClient,
-  name: string,
-): Promise<InspectImage> {
-  const resp = await cli.get<InspectImage>(`/images/${name}/json`);
-  return resp.body;
+  denops: Denops,
+  id: string,
+): Promise<string[]> {
+  const cmd = `docker inspect ${id}`;
+  const result = await denops.call("systemlist", cmd) as string[];
+  return result;
 }
 
 export async function removeImage(
@@ -153,4 +153,13 @@ export async function killContainer(
   name: string,
 ): Promise<Response> {
   return await cli.post(`/containers/${name}/kill`);
+}
+
+export async function inspectContainer(
+  denops: Denops,
+  name: string,
+): Promise<string[]> {
+  const cmd = `docker inspect ${name}`;
+  const result = await denops.call("systemlist", cmd) as string[];
+  return result;
 }

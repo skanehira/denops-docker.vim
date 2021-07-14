@@ -16,10 +16,30 @@ import {
   stopContainer,
 } from "./action.ts";
 
+async function getID(bm: BufferManager, bufnr: number): Promise<string> {
+  const line = await bm.getbufline(bufnr, 'line(".")');
+  const [id] = line[0].split(" ", 1);
+  return id;
+}
+
 async function getName(bm: BufferManager, bufnr: number): Promise<string> {
   const line = await bm.getbufline(bufnr, 'line(".")');
   const [_, name] = line[0].split(" ", 2);
   return name;
+}
+
+async function inspect(denops: Denops, bm: BufferManager, id: string) {
+  const result = await docker.inspectImage(denops, id);
+  const buf = await bm.newBuffer({
+    name: id,
+    opener: "drop",
+    buftype: "nofile",
+    ft: "json",
+    maps: [
+      new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+    ],
+  });
+  await bm.setbufline(buf.bufnr, 1, result);
 }
 
 async function updateContainerBuffer(
@@ -64,6 +84,12 @@ export async function main(denops: Denops): Promise<void> {
             "nnoremap",
             "r",
             `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "<CR>",
+            `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
         ],
@@ -134,6 +160,12 @@ export async function main(denops: Denops): Promise<void> {
             `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
+          new KeyMap(
+            "nnoremap",
+            "<CR>",
+            `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
         ],
       });
 
@@ -167,13 +199,6 @@ export async function main(denops: Denops): Promise<void> {
     async pullImage(name: unknown) {
       if (ensureString(name)) {
         await docker.pullImage(denops, name);
-      }
-    },
-
-    async inspectImage(name: unknown) {
-      if (ensureString(name)) {
-        const resp = await docker.inspectImage(httpClient, name);
-        console.log(resp);
       }
     },
 
@@ -228,6 +253,16 @@ export async function main(denops: Denops): Promise<void> {
     async tailContainerLogs() {
       const name = await getName(bm, containerBuffer.bufnr);
       await docker.tailContainerLogs(denops, name);
+    },
+
+    async inspectImage() {
+      const id = await getID(bm, imageBuffer.bufnr);
+      await inspect(denops, bm, id);
+    },
+
+    async inspectContainer() {
+      const name = await getName(bm, containerBuffer.bufnr);
+      await inspect(denops, bm, name);
     },
 
     async searchImage(name: unknown) {
