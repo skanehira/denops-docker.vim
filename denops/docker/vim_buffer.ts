@@ -62,11 +62,9 @@ export class BufferManager {
     }
 
     await this.#denops.cmd(cmd.join(" "), ctx);
+    buffer.bufnr = await this.#denops.call("bufnr") as number;
     if (opts?.name) {
-      buffer.bufnr = await fn.bufnr(this.#denops, opts.name);
       buffer.name = opts.name;
-    } else {
-      buffer.bufnr = await this.#denops.call("bufnr") as number;
     }
 
     if (opts?.ft) {
