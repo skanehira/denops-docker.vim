@@ -74,7 +74,7 @@ export async function main(denops: Denops): Promise<void> {
 
     async containers() {
       if (await bm.bufexists(containerBuffer.bufnr)) {
-        bm.openBuffer(containerBuffer.bufnr);
+        await bm.openBuffer(containerBuffer.bufnr);
         return;
       }
       containerBuffer = await bm.newBuffer({

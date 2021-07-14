@@ -105,8 +105,14 @@ export class BufferManager {
     return await this.#denops.call("bufexists", bufnr) as boolean;
   }
 
-  openBuffer(bufnr: number) {
-    this.#denops.cmd(`sb ${bufnr}`);
+  async openBuffer(bufnr: number) {
+    const buffer = this.#buffers[bufnr];
+    if (buffer.name) {
+      await this.#denops.cmd(`drop ${buffer.name}`);
+    } else {
+      // TODO
+      // if buffer name is empty, use win_gotoid instead
+    }
   }
 
   addBuffers(buffer: Buffer) {
