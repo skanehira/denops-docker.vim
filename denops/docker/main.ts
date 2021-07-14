@@ -50,8 +50,8 @@ export async function main(denops: Denops): Promise<void> {
 
   denops.dispatcher = {
     async images() {
-      if (await bm.bufexists(containerBuffer.bufnr)) {
-        bm.openBuffer(containerBuffer.bufnr);
+      if (await bm.bufexists(imageBuffer.bufnr)) {
+        await bm.openBuffer(imageBuffer.bufnr);
         return;
       }
       imageBuffer = await bm.newBuffer({
