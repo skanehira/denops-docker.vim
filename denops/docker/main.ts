@@ -78,6 +78,7 @@ export async function main(denops: Denops): Promise<void> {
         name: "images",
         opener: "drop",
         buftype: "nofile",
+        modifiable: false,
         maps: [
           new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
           new KeyMap(
@@ -116,6 +117,7 @@ export async function main(denops: Denops): Promise<void> {
         opener: "drop",
         buftype: "nofile",
         wrap: "nowrap",
+        modifiable: false,
         maps: [
           new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
           new KeyMap(

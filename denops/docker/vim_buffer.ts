@@ -1,5 +1,4 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
-import * as fn from "https://deno.land/x/denops_std/function/mod.ts";
 import { KeyMap } from "./vim_map.ts";
 
 export type buftype =
@@ -20,7 +19,7 @@ export interface Buffer {
   bufhidden?: bufhidden;
   swapfile: boolean;
   wrap: "wrap" | "nowrap";
-  modifiable: boolean;
+  modifiable?: boolean;
 }
 
 export interface NewBufferOpts {
@@ -52,9 +51,9 @@ export class BufferManager {
     return BufferManager.instance;
   }
 
-  async newBuffer(opts?: NewBufferOpts): Promise<Buffer> {
+  async newBuffer(opts: NewBufferOpts): Promise<Buffer> {
     const buffer = {} as Buffer;
-    const cmd = [opts?.opener ?? "new"];
+    const cmd = [opts.opener ?? "new"];
     const ctx = {} as Record<string, string>;
     if (opts?.name) {
       cmd.push(opts.name);
@@ -89,6 +88,12 @@ export class BufferManager {
       opts?.maps.forEach(async (map) => {
         await this.addKeyMap(buffer.bufnr, map);
       });
+    }
+
+    if (`modifiable` in opts) {
+      buffer.modifiable = opts.modifiable;
+      const modify = opts.modifiable ? "modifiable" : "nomodifiable";
+      await this.#denops.cmd(`setlocal ${modify}`);
     }
 
     await this.#denops.cmd(`setlocal bufhidden=hide`);
@@ -152,14 +157,21 @@ export class BufferManager {
   }
 
   async setbufline(buf: number, start: number | string, text: string[]) {
+    const modifiable = await this.#denops.eval("&modifiable");
+    if (!modifiable) {
+      await this.#denops.cmd("setlocal modifiable");
+    }
     const cursor = await this.#denops.call("getcurpos");
     await this.#denops.cmd(
       `silent call deletebufline(${buf}, ${start}, "$")`,
     );
-    await this.#denops.eval(`setbufline(${buf}, ${start}, text)`, {
+    await this.#denops.cmd(`call setbufline(${buf}, ${start}, text)`, {
       text: text,
     });
     await this.#denops.call("setpos", ".", cursor);
+    if (!modifiable) {
+      await this.#denops.cmd("setlocal nomodifiable");
+    }
   }
 
   async deletebufline(buf: number, start: number, end?: number | string) {
