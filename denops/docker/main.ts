@@ -12,6 +12,7 @@ import {
   getImages,
   quickrunImage,
   removeContainer,
+  removeImage,
   startContainer,
   stopContainer,
 } from "./action.ts";
@@ -26,6 +27,12 @@ async function getName(bm: BufferManager, bufnr: number): Promise<string> {
   const line = await bm.getbufline(bufnr, 'line(".")');
   const [_, name] = line[0].split(" ", 2);
   return name;
+}
+
+async function getRepoTag(bm: BufferManager, bufnr: number): Promise<string> {
+  const line = await bm.getbufline(bufnr, 'line(".")');
+  const [_, repo, tag] = line[0].split(" ").filter((v) => v != "");
+  return `${repo}:${tag}`;
 }
 
 async function inspect(denops: Denops, bm: BufferManager, id: string) {
@@ -91,6 +98,12 @@ export async function main(denops: Denops): Promise<void> {
             "nnoremap",
             "<CR>",
             `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
+            ["<buffer>", "<silent>"],
+          ),
+          new KeyMap(
+            "nnoremap",
+            "<C-d>",
+            `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
         ],
@@ -276,13 +289,23 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async quickrunImage() {
-      const name = await getName(bm, imageBuffer.bufnr);
+      const name = await getRepoTag(bm, imageBuffer.bufnr);
       await quickrunImage(denops, name);
     },
 
-    async removeImage(name: unknown) {
-      if (ensureString(name)) {
-        await docker.removeImage(httpClient, name);
+    async removeImage() {
+      const name = await getRepoTag(bm, imageBuffer.bufnr);
+      const input = await denops.eval(
+        `input("Do you want to remove ${name}?(y/n): ")`,
+      ) as string;
+      if (input && input === "y" || input === "Y") {
+        if (await removeImage(httpClient, name)) {
+          console.log(`removed ${name}`);
+          const images = await getImages(httpClient);
+          await bm.setbufline(imageBuffer.bufnr, 1, images);
+        }
+      } else {
+        console.log("canceled");
       }
     },
 
