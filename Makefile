@@ -1,7 +1,7 @@
 .PHOY: coverage
 coverage:
-	@deno test --allow-all --unstable --no-check --coverage=cov
+	@deno test --allow-all --unstable --coverage=cov
 	@deno coverage cov
 	@rm -rf cov
 test:
-	@deno test --allow-all --unstable --no-check
+	@deno test --allow-all --unstable
