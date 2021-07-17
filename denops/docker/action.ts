@@ -1,4 +1,4 @@
-import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.0/mod.ts";
+import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
