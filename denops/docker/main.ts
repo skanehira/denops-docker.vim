@@ -49,27 +49,40 @@ async function inspect(denops: Denops, bm: BufferManager, id: string) {
   await bm.setbufline(buf.bufnr, 1, result);
 }
 
-async function updateContainerBuffer(
-  bufnr: number,
-  bm: BufferManager,
-  httpClient: HttpClient,
-) {
-  const containers = await getContainers(httpClient);
-  await bm.setbufline(bufnr, 1, containers);
-}
-
 export async function main(denops: Denops): Promise<void> {
   const bm = BufferManager.get(denops);
   const httpClient = await HttpClient.get();
-  let intervalTimerID = 0;
 
   const commands: string[] = [
-    `command! DockerImages call denops#notify("${denops.name}", "images", [])`,
-    `command! DockerContainers call denops#notify("${denops.name}", "containers", [])`,
+    `command! DockerImages :drop docker://images`,
+    `command! DockerContainers :drop docker://containers`,
   ];
 
   commands.forEach((cmd) => {
     denops.cmd(cmd);
+  });
+
+  await autocmd.group(denops, "denops_docker", (helper) => {
+    helper.define(
+      "BufReadCmd",
+      "docker://containers",
+      `call denops#notify("${denops.name}", "containers", [])`,
+    );
+    helper.define(
+      "BufReadCmd",
+      "docker://images",
+      `call denops#notify("${denops.name}", "images", [])`,
+    );
+    helper.define(
+      "BufWipeout",
+      "docker://containers",
+      `call denops#notify("${denops.name}", "beforeImagesBufferDelete", [])`,
+    );
+    helper.define(
+      "BufWipeout",
+      "<buffer>",
+      `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
+    );
   });
 
   let containerBuffer = { bufnr: -1 } as Buffer;
@@ -77,12 +90,8 @@ export async function main(denops: Denops): Promise<void> {
 
   denops.dispatcher = {
     async images() {
-      if (await bm.bufexists(imageBuffer.bufnr)) {
-        await bm.openBuffer(imageBuffer.bufnr);
-        return;
-      }
       imageBuffer = await bm.newBuffer({
-        name: "images",
+        name: "docker://images",
         opener: "drop",
         buftype: "nofile",
         modifiable: false,
@@ -110,23 +119,11 @@ export async function main(denops: Denops): Promise<void> {
       });
       const images = await getImages(httpClient);
       await bm.setbufline(imageBuffer.bufnr, 1, images);
-
-      await autocmd.group(denops, "denops_docker_images", (helper) => {
-        helper.define(
-          "BufWipeout",
-          "<buffer>",
-          `call denops#notify("${denops.name}", "beforeImagesBufferDelete", [])`,
-        );
-      });
     },
 
     async containers() {
-      if (await bm.bufexists(containerBuffer.bufnr)) {
-        await bm.openBuffer(containerBuffer.bufnr);
-        return;
-      }
       containerBuffer = await bm.newBuffer({
-        name: "containers",
+        name: "docker://containers",
         opener: "drop",
         buftype: "nofile",
         wrap: "nowrap",
@@ -186,22 +183,9 @@ export async function main(denops: Denops): Promise<void> {
 
       const containers = await getContainers(httpClient);
       await bm.setbufline(containerBuffer.bufnr, 1, containers);
-
-      intervalTimerID = setInterval(() => {
-        updateContainerBuffer(containerBuffer.bufnr, bm, httpClient);
-      }, 5000);
-
-      await autocmd.group(denops, "denops_docker_containers", (helper) => {
-        helper.define(
-          "BufWipeout",
-          "<buffer>",
-          `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
-        );
-      });
     },
 
     beforeContainersBufferDelete() {
-      clearInterval(intervalTimerID);
       containerBuffer = { bufnr: -1 } as Buffer;
       return Promise.resolve();
     },
