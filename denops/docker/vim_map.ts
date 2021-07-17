@@ -1,4 +1,4 @@
-export type mode =
+export type Mode =
   | "map"
   | "noremap"
   | "nmap"
@@ -12,7 +12,7 @@ export type mode =
   | "imap"
   | "inoremap";
 
-export type arg =
+export type Arg =
   | "<buffer>"
   | "<nowait>"
   | "<silent>"
@@ -20,29 +20,20 @@ export type arg =
   | "<script>"
   | "<unique>";
 
-export class KeyMap {
-  mode: mode;
-  lhs: string;
-  rhs: string;
-  args?: arg[];
-
-  constructor(mode: mode, lhs: string, rhs: string, args?: arg[]) {
-    this.mode = mode;
-    this.lhs = lhs;
-    this.rhs = rhs;
-    this.args = args;
+export function newKeyMap(
+  mode: Mode,
+  lhs: string,
+  rhs: string,
+  args?: Arg[],
+): string {
+  const strings = new Array<string>(mode);
+  if (args) {
+    args.forEach((arg) => {
+      strings.push(arg);
+    });
   }
 
-  toString(): string {
-    const strings = new Array<string>(this.mode);
-    if (this.args) {
-      this.args.forEach((arg) => {
-        strings.push(arg);
-      });
-    }
+  strings.push(lhs, rhs);
 
-    strings.push(this.lhs, this.rhs);
-
-    return strings.join(" ");
-  }
+  return strings.join(" ");
 }

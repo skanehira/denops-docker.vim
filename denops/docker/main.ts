@@ -4,7 +4,7 @@ import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { ensureString } from "./util.ts";
 import { Buffer, BufferManager } from "./vim_buffer.ts";
-import { KeyMap } from "./vim_map.ts";
+import { newKeyMap } from "./vim_map.ts";
 import {
   attachContainer,
   execContainer,
@@ -43,7 +43,7 @@ async function inspect(denops: Denops, bm: BufferManager, id: string) {
     buftype: "nofile",
     ft: "json",
     maps: [
-      new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+      newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
     ],
   });
   await bm.setbufline(buf.bufnr, 1, result);
@@ -96,20 +96,20 @@ export async function main(denops: Denops): Promise<void> {
         buftype: "nofile",
         modifiable: false,
         maps: [
-          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
-          new KeyMap(
+          newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+          newKeyMap(
             "nnoremap",
             "r",
             `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "<CR>",
             `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "<C-d>",
             `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
@@ -129,50 +129,50 @@ export async function main(denops: Denops): Promise<void> {
         wrap: "nowrap",
         modifiable: false,
         maps: [
-          new KeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
-          new KeyMap(
+          newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+          newKeyMap(
             "nnoremap",
             "u",
             `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "d",
             `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "<C-k>",
             `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "a",
             `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "e",
             `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "t",
             `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "<C-d>",
             `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
             ["<buffer>", "<silent>"],
           ),
-          new KeyMap(
+          newKeyMap(
             "nnoremap",
             "<CR>",
             `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,

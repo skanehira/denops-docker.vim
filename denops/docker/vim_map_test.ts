@@ -1,8 +1,8 @@
-import { KeyMap } from "./vim_map.ts";
+import { newKeyMap } from "./vim_map.ts";
 import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
 
 Deno.test("map full args", () => {
-  const map = new KeyMap("nnoremap", ",f", ":call denops#test#func<CR>", [
+  const map = newKeyMap("nnoremap", ",f", ":call denops#test#func<CR>", [
     "<expr>",
     "<buffer>",
     "<unique>",
@@ -15,7 +15,7 @@ Deno.test("map full args", () => {
 });
 
 Deno.test("map minimal args", () => {
-  const map = new KeyMap("imap", ",f", "<C-o>:call denops#test#func<CR>");
+  const map = newKeyMap("imap", ",f", "<C-o>:call denops#test#func<CR>");
   const got = map.toString();
   const want = "imap ,f <C-o>:call denops#test#func<CR>";
 
