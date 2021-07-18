@@ -57,6 +57,7 @@ export async function main(denops: Denops): Promise<void> {
   const commands: string[] = [
     `command! DockerImages :drop docker://images`,
     `command! DockerContainers :drop docker://containers`,
+    `command! DockerSearchImage :drop docker://hub`,
   ];
 
   commands.forEach((cmd) => {
