@@ -1,4 +1,4 @@
-# denops-docker.vim
+# denops-docker.vim ![](https://img.shields.io/badge/powered%20by-denops-blueviolet)
 This is the new version of [docker.vim](https://github.com/skanehira/docker.vim) that can manage docker in vim/Neovim, written in [denops.vim](https://github.com/vim-denops/denops.vim).  
 
 ## Requirements
