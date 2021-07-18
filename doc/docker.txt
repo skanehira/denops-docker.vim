@@ -58,6 +58,12 @@ VARIABLES					*docker-variables*
 
 ------------------------------------------------------------------------------
 COMMANDS					*docker-commands*
+:Docker	{...args}				*:Docker*
+  Run docker command.
+  example: >
+    :Docker ps -a
+    :Docker run --rm -it bash
+>
 :DockerImages					*:DockerImages*
   Open buffer of |docker-images|
 

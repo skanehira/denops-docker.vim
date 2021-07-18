@@ -1,7 +1,16 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
 import { HttpClient } from "./http.ts";
+import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
+
+export async function runDockerCLI(denops: Denops, args: unknown[]) {
+  const cmd = new Array<string>("docker");
+  (args as string[]).forEach((arg: string) => {
+    cmd.push(arg);
+  });
+  await runTerminal(denops, cmd);
+}
 
 export async function getImages(httpClient: HttpClient): Promise<string[]> {
   const images = await docker.images(httpClient);

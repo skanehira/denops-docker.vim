@@ -13,6 +13,7 @@ import {
   quickrunImage,
   removeContainer,
   removeImage,
+  runDockerCLI,
   searchImage,
   startContainer,
   stopContainer,
@@ -58,6 +59,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerImages :drop docker://images`,
     `command! DockerContainers :drop docker://containers`,
     `command! DockerSearchImage :drop docker://hub`,
+    `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
   ];
 
   commands.forEach((cmd) => {
@@ -97,6 +99,9 @@ export async function main(denops: Denops): Promise<void> {
   let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
+    async runDockerCLI(...args: unknown[]) {
+      await runDockerCLI(denops, args);
+    },
     async dockerhub() {
       const term = await denops.eval(`input("term: ")`) as string;
       if (term) {
