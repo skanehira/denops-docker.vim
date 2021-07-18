@@ -247,7 +247,7 @@ export async function main(denops: Denops): Promise<void> {
             alias: {
               mode: "map",
               lhs: "t",
-              rhs: "<Plug>(docker-container-tail)",
+              rhs: "<Plug>(docker-container-log)",
             },
           },
           {
