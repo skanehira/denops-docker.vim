@@ -108,6 +108,7 @@ export async function main(denops: Denops): Promise<void> {
         imageBuffer = await bm.newBuffer({
           name: "docker://hub",
           opener: "drop",
+          ft: "docker-hub",
           buftype: "nofile",
           modifiable: false,
           maps: [
@@ -136,6 +137,7 @@ export async function main(denops: Denops): Promise<void> {
       imageBuffer = await bm.newBuffer({
         name: "docker://images",
         opener: "drop",
+        ft: "docker-images",
         buftype: "nofile",
         modifiable: false,
         maps: [
@@ -182,6 +184,7 @@ export async function main(denops: Denops): Promise<void> {
       containerBuffer = await bm.newBuffer({
         name: "docker://containers",
         opener: "drop",
+        ft: "docker-containers",
         buftype: "nofile",
         wrap: "nowrap",
         modifiable: false,
