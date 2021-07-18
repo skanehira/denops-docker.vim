@@ -95,7 +95,7 @@ export class BufferManager {
       await this.#denops.cmd(`setlocal ${modify}`);
     }
 
-    await this.#denops.cmd(`setlocal bufhidden=hide`);
+    await this.#denops.cmd(`setlocal bufhidden=hide nolist`);
 
     this.addBuffers(buffer);
     return buffer;
