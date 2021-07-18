@@ -3,7 +3,7 @@ import * as autocmd from "https://deno.land/x/denops_std@v1.0.0-beta.8/autocmd/m
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { Buffer, BufferManager } from "./vim_buffer.ts";
-import { newKeyMap } from "./vim_map.ts";
+import { defaultKeymap } from "./vim_map.ts";
 import {
   attachContainer,
   execContainer,
@@ -44,7 +44,7 @@ async function inspect(denops: Denops, bm: BufferManager, id: string) {
     buftype: "nofile",
     ft: "json",
     maps: [
-      newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+      defaultKeymap.bufferClose,
     ],
   });
   await bm.setbufline(buf.bufnr, 1, result);
@@ -106,13 +106,17 @@ export async function main(denops: Denops): Promise<void> {
           buftype: "nofile",
           modifiable: false,
           maps: [
-            newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
-            newKeyMap(
-              "nnoremap",
-              "<CR>",
-              `:call denops#notify("${denops.name}", "pullImage", [])<CR>`,
-              ["<buffer>", "<silent>"],
-            ),
+            defaultKeymap.bufferClose,
+            {
+              mode: "nnoremap",
+              rhs: `:call denops#notify("${denops.name}", "pullImage", [])<CR>`,
+              args: ["<buffer>", "<silent>"],
+              alias: {
+                mode: "map",
+                lhs: "<CR>",
+                rhs: "<Plug>(docker-pull-image)",
+              },
+            },
           ],
         });
 
@@ -130,25 +134,39 @@ export async function main(denops: Denops): Promise<void> {
         buftype: "nofile",
         modifiable: false,
         maps: [
-          newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
-          newKeyMap(
-            "nnoremap",
-            "r",
-            `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "<CR>",
-            `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "<C-d>",
-            `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
+          defaultKeymap.bufferClose,
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "r",
+              rhs: "<Plug>(docker-image-quickrun)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "<CR>",
+              rhs: "<Plug>(docker-image-inspect)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs: `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "<C-d>",
+              rhs: "<Plug>(docker-image-remove)",
+            },
+          },
         ],
       });
       const images = await getImages(httpClient);
@@ -163,55 +181,98 @@ export async function main(denops: Denops): Promise<void> {
         wrap: "nowrap",
         modifiable: false,
         maps: [
-          newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
-          newKeyMap(
-            "nnoremap",
-            "u",
-            `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "d",
-            `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "<C-k>",
-            `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "a",
-            `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "e",
-            `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "t",
-            `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "<C-d>",
-            `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
-          newKeyMap(
-            "nnoremap",
-            "<CR>",
-            `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
-            ["<buffer>", "<silent>"],
-          ),
+          defaultKeymap.bufferClose,
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "u",
+              rhs: "<Plug>(docker-container-start)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "d",
+              rhs: "<Plug>(docker-container-stop)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "<C-k>",
+              rhs: "<Plug>(docker-container-kill)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "a",
+              rhs: "<Plug>(docker-container-attach)",
+            },
+          },
+          {
+            mode: "nnoremap",
+
+            rhs:
+              `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "e",
+              rhs: "<Plug>(docker-contianer-exec)",
+            },
+          },
+          {
+            mode: "nnoremap",
+
+            rhs:
+              `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "t",
+              rhs: "<Plug>(docker-container-tail)",
+            },
+          },
+          {
+            mode: "nnoremap",
+
+            rhs:
+              `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "<C-d>",
+              rhs: "<Plug>(docker-container-remove)",
+            },
+          },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "<CR>",
+              rhs: "<Plug>(docker-container-inspect)",
+            },
+          },
         ],
       });
 

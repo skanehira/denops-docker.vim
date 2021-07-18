@@ -1,4 +1,5 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
+import { KeyMap, toKeymaps } from "./vim_map.ts";
 
 export type buftype =
   | "acwrite"
@@ -30,7 +31,7 @@ export interface NewBufferOpts {
   swapfile?: boolean;
   wrap?: "wrap" | "nowrap";
   modifiable?: boolean;
-  maps?: string[];
+  maps?: KeyMap[];
 }
 
 export class BufferManager {
@@ -131,12 +132,14 @@ export class BufferManager {
     this.removeBuffers(buf);
   }
 
-  async addKeyMap(buf: number, map: string) {
+  async addKeyMap(buf: number, map: KeyMap) {
     const curbuf = await this.#denops.call("bufnr");
     try {
-      await this.#denops.cmd(
-        `noautocmd keepalt keepjumps silent buffer ${buf} | ${map}`,
-      );
+      toKeymaps(map).forEach(async (map) => {
+        await this.#denops.cmd(
+          `noautocmd keepalt keepjumps silent buffer ${buf} | ${map}`,
+        );
+      });
     } catch (e) {
       throw e;
     } finally {
