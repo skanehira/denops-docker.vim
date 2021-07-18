@@ -1,0 +1,124 @@
+*gh.txt*	Manage Docker in Neovim/Vim
+
+Author: skanehira <sho19921005@gmail.com>
+License : MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+==============================================================================
+CONTENTS					*docker-contents*
+
+INTRODUCTION			|docker-introduction|
+USAGE				|docker-usage|
+INTERFACE			|docker-interface|
+  COMMANDS			  |docker-commands|
+  VARIABLES			  |docker-variables|
+  BUFFER			  |docker-buffers|
+  KEY-MAPPINGS			  |docker-key-mappings|
+  FUNCTIONS			  |docker-functions|
+TODO				|docker-todo|
+CHANGELOG			|docker-changelog|
+
+
+==============================================================================
+INTRODUCTION					*docker-introduction*
+
+*denops-docker.vim* is a Vim/Neovim plugin for Docker
+that can start or stop containers, and show images, create container from
+specified image.
+
+Latest version:
+https://github.com/skanehira/denops-docker.vim
+
+
+==============================================================================
+USAGE						*docker-usage*
+
+==============================================================================
+INTERFACE					*docker-interface*
+
+------------------------------------------------------------------------------
+VARIABLES					*docker-variables*
+
+------------------------------------------------------------------------------
+COMMANDS					*docker-commands*
+:DockerImages					*:DockerImages*
+  Open buffer of |docker-images|
+
+:DockerContainers				*:DockerContainers*
+  Open buffer of |docker-containers|
+
+:DockerSearchImage				*:DockerSearchImage*
+  Open buffer of |docker-hub|
+
+------------------------------------------------------------------------------
+BUFFER							*docker-buffers*
+
+docker://images						*docker-images*
+  Show images
+  You can quick run specified image or inspect image, and otehrs.
+
+docker://containers					*docker-containers*
+  Show containers
+  You can up or down specified container or attach, exec, and others.
+
+docker://hub						*docker-hub*
+  Search images
+  You can search image with inputed term and pull specified image.
+
+------------------------------------------------------------------------------
+KEY-MAPPINGS					*docker-key-mappings*
+
+						*docker-default-key-mappings*
+
+default mappings
+
+{buffer}		{mode}		{lhs}	{rhs}
+-------------------------------------------------------------------------------
+|docker-images|		`normal`	<CR>	<Plug>(docker-image-inspect)
+			`normal`	r	<Plug>(docker-image-quickrun)
+			`normal`	<C-d>	<Plug>(docker-image-remove)
+			`normal`	q	<Plug>(docker-buffer-close)
+|docker-containers|	`normal`	<CR>	<Plug>(docker-container-inspect)
+			`normal`	u	<Plug>(docker-container-start)
+			`normal`	d	<Plug>(docker-container-stop)
+			`normal`	<C-k>	<Plug>(docker-container-kill)
+			`normal`	a	<Plug>(docker-container-attach)
+			`normal`	e	<Plug>(docker-container-exec)
+			`normal`	t	<Plug>(docker-container-log)
+			`normal`	<C-d>	<Plug>(docker-container-remove)
+			`normal`	q	<Plug>(docker-buffer-close)
+|docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
+			`normal`	q	<Plug>(docker-buffer-close)
+
+------------------------------------------------------------------------------
+FUNCTIONS					*docker-functions*
+
+
+==============================================================================
+TODO						*docker-todo*
+
+
+
+==============================================================================
+CHANGELOG					*docker-changelog*
+
+
+==============================================================================
+vim:tw=85:ts=8:ft=help:norl:noet:fen:
