@@ -19,11 +19,6 @@ export async function pullImage(denops: Denops, name: string) {
   await docker.pullImage(denops, name);
 }
 
-export async function inspectImage(httpClient: HttpClient, name: string) {
-  const resp = await docker.inspectImage(httpClient, name);
-  console.log(resp);
-}
-
 export async function attachContainer(denops: Denops, name: string) {
   await docker.attachContainer(denops, name);
 }
@@ -65,10 +60,14 @@ export async function killContainer(httpClient: HttpClient, name: string) {
   return resp.status < 300;
 }
 
-export async function searchImage(httpClient: HttpClient, name: string) {
+export async function searchImage(
+  httpClient: HttpClient,
+  name: string,
+): Promise<string[]> {
   console.log(`search "${name}" start`);
   const images = await docker.searchImage(httpClient, name);
-  console.table(images);
+  const table = makeTableString(images);
+  return table;
 }
 
 export async function quickrunImage(denops: Denops, name: string) {

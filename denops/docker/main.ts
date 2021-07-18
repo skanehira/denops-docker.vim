@@ -2,7 +2,6 @@ import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
 import * as autocmd from "https://deno.land/x/denops_std@v1.0.0-beta.8/autocmd/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
-import { ensureString } from "./util.ts";
 import { Buffer, BufferManager } from "./vim_buffer.ts";
 import { newKeyMap } from "./vim_map.ts";
 import {
@@ -10,9 +9,11 @@ import {
   execContainer,
   getContainers,
   getImages,
+  pullImage,
   quickrunImage,
   removeContainer,
   removeImage,
+  searchImage,
   startContainer,
   stopContainer,
 } from "./action.ts";
@@ -83,12 +84,44 @@ export async function main(denops: Denops): Promise<void> {
       "<buffer>",
       `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
     );
+
+    helper.define(
+      "BufReadCmd",
+      "docker://hub",
+      `call denops#notify("${denops.name}", "dockerhub", [])`,
+    );
   });
 
   let containerBuffer = { bufnr: -1 } as Buffer;
   let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
+    async dockerhub() {
+      const term = await denops.eval(`input("term: ")`) as string;
+      if (term) {
+        imageBuffer = await bm.newBuffer({
+          name: "docker://hub",
+          opener: "drop",
+          buftype: "nofile",
+          modifiable: false,
+          maps: [
+            newKeyMap("nnoremap", "q", ":bw!<CR>", ["<buffer>", "<silent>"]),
+            newKeyMap(
+              "nnoremap",
+              "<CR>",
+              `:call denops#notify("${denops.name}", "pullImage", [])<CR>`,
+              ["<buffer>", "<silent>"],
+            ),
+          ],
+        });
+
+        const images = await searchImage(httpClient, term);
+        await bm.setbufline(imageBuffer.bufnr, 1, images);
+      } else {
+        console.log("canceled");
+      }
+    },
+
     async images() {
       imageBuffer = await bm.newBuffer({
         name: "docker://images",
@@ -195,10 +228,9 @@ export async function main(denops: Denops): Promise<void> {
       return Promise.resolve();
     },
 
-    async pullImage(name: unknown) {
-      if (ensureString(name)) {
-        await docker.pullImage(denops, name);
-      }
+    async pullImage() {
+      const name = await getID(bm, imageBuffer.bufnr);
+      await pullImage(denops, name);
     },
 
     async attachContainer() {
@@ -262,14 +294,6 @@ export async function main(denops: Denops): Promise<void> {
     async inspectContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
       await inspect(denops, bm, name);
-    },
-
-    async searchImage(name: unknown) {
-      if (ensureString(name)) {
-        console.log(`search "${name}" start`);
-        const images = await docker.searchImage(httpClient, name);
-        console.table(images);
-      }
     },
 
     async quickrunImage() {
