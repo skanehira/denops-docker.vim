@@ -1,4 +1,4 @@
-import { datetime } from "https://deno.land/x/ptera/mod.ts";
+import { datetime } from "https://deno.land/x/ptera@v1.0.0-beta/mod.ts";
 import type { Container, Image, Port, SearchImage } from "./types.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.19.0/table/mod.ts";
 import { formatBytes } from "./util.ts";
