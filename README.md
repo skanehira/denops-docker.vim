@@ -11,7 +11,7 @@ This is the new version of [docker.vim](https://github.com/skanehira/docker.vim)
 ## Features
 ### Image
 - search image on docker hub
-- quick run container with specified image (like `docker run --rm -it {image} sh or bash`)
+- quick run container with specified image
 - inspect image
 - delete image
 

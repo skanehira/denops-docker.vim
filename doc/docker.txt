@@ -90,6 +90,54 @@ docker://hub						*docker-hub*
 
 ------------------------------------------------------------------------------
 KEY-MAPPINGS					*docker-key-mappings*
+<Plug>(docker-image-inspect)			*<Plug>(docker-image-inspect)*
+  Inspect specified image.
+
+<Plug>(docker-image-quickrun)			*<Plug>(docker-image-quickrun)*
+  Quick run container with specified image.
+  This action is like bellow. >
+    docker run --rm -it --detach-keys=ctrl-\\ {image} --entrypoint \
+      sh -c "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh"
+>
+<<Plug>(docker-image-remove)			*<Plug>(docker-image-remove)*
+  Remove specified image.
+
+<Plug>(docker-buffer-close)			*<Plug>(docker-buffer-close)*
+  Close buffer.
+
+<Plug>(docker-container-inspect)		*<Plug>(docker-container-inspect)*
+  Inspect specified container.
+
+<Plug>(docker-container-start)			*<Plug>(docker-container-start)*
+  Start specified container.
+
+<Plug>(docker-container-stop)			*<Plug>(docker-container-stop)*
+  Stop specified container.
+
+<Plug>(docker-container-kill)			*<Plug>(docker-container-kill)*
+  Kill specified container.
+
+<Plug>(docker-container-attach)			*<Plug>(docker-container-attach)*
+  Attach specified container.
+  This actions is like bellow.
+>
+  docker exec -it --detach-keys=ctrl-\\ {container} sh -c \
+    "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh"
+<
+<Plug>(docker-container-exec)			*<Plug>(docker-container-exec)*
+  Execute some command.
+  This action is like bellow.
+>
+  docker exec -it --detach-keys=ctrl-\\ {container} {command}
+<
+<Plug>(docker-container-log)			*<Plug>(docker-container-log)*
+  Tail specified container log.
+
+<Plug>(docker-container-remove)			*<Plug>(docker-container-remove)*
+  Remove specified container.
+
+<Plug>(docker-pull-image)			*<Plug>(docker-pull-image)*
+  Pull specified image in |docker-hub|
 
 						*docker-default-key-mappings*
 
