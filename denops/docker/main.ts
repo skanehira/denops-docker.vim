@@ -79,12 +79,12 @@ export async function main(denops: Denops): Promise<void> {
     );
     helper.define(
       "BufWipeout",
-      "docker://containers",
+      "docker://images",
       `call denops#notify("${denops.name}", "beforeImagesBufferDelete", [])`,
     );
     helper.define(
       "BufWipeout",
-      "<buffer>",
+      "docker://containers",
       `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
     );
 
