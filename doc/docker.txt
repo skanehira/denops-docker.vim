@@ -1,4 +1,4 @@
-*gh.txt*	Manage Docker in Neovim/Vim
+*docker.txt*	Manage Docker in Neovim/Vim
 
 Author: skanehira <sho19921005@gmail.com>
 License : MIT license  {{{
