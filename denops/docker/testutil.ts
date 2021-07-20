@@ -24,5 +24,5 @@ export async function readJSON<T>(file: string): Promise<T> {
 
 export async function readFile(file: string): Promise<string> {
   const out = await Deno.readFile(file);
-  return new TextDecoder().decode(out).trimRight();
+  return new TextDecoder().decode(out).replace(/(\r?\n)$/, "");
 }

@@ -1,0 +1,23 @@
+[
+  {
+    "description": "some 1",
+    "is_official": true,
+    "is_automated": false,
+    "name": "wma55/u1210sshd",
+    "star_count": 10
+  },
+  {
+    "description": "some 3",
+    "is_official": false,
+    "is_automated": true,
+    "name": "jdswinbank/sshd",
+    "star_count": 0
+  },
+  {
+    "description": "some3",
+    "is_official": true,
+    "is_automated": false,
+    "name": "vgauthier/sshd",
+    "star_count": 32042
+  }
+]
