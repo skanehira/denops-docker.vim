@@ -31,6 +31,9 @@ jobs:
     name: deno test
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install docker
+        run: |
+          brew install docker docker-machine
       - uses: actions/checkout@v2
       - uses: denoland/setup-deno@main
         with:
