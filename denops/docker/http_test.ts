@@ -53,17 +53,14 @@ Deno.test("http get with options", () => {
   );
 });
 
-Deno.test("http get with options", () => {
+Deno.test("http get without options", () => {
   const reqStr = HttpClient.newRequest({
     url: "test",
     method: "GET",
-    header: {},
-    params: {},
-    data: {},
   });
 
   assertEquals(
     reqStr,
-    `GET test HTTP/1.1\r\nHost: localhost\r\n\r\n\r\n`,
+    `GET test HTTP/1.1\r\nHost: localhost\r\n\r\n`,
   );
 });
