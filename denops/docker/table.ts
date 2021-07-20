@@ -1,6 +1,9 @@
+import { datetime } from "https://deno.land/x/ptera/mod.ts";
 import type { Container, Image, Port, SearchImage } from "./types.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.19.0/table/mod.ts";
 import { formatBytes } from "./util.ts";
+
+const dateFormat = "YYYY/MM/dd HH:mm:ss";
 
 function isImage(data: unknown): data is Image[] {
   const images = data as Image[];
@@ -59,7 +62,7 @@ function makeImageTable(images: Image[]): string[] {
         image.Id.substring(7, 19),
         repo,
         tag,
-        new Date(image.Created * 1000).toISOString(),
+        datetime(image.Created * 1000).format(dateFormat),
         formatBytes(image.Size),
       ];
       body.push(line);
@@ -85,7 +88,7 @@ function makeContainerTable(containers: Container[]): string[] {
         ? `${container.Image.substring(0, 20)}...`
         : container.Image,
       container.Status,
-      new Date(container.Created * 1000).toISOString(),
+      datetime(container.Created * 1000).format(dateFormat),
       container.Ports.map((port) => {
         return portString(port);
       }).join(", "),
