@@ -1,4 +1,6 @@
 .PHOY: coverage
+export TZ=Asia/Tokyo
+
 coverage:
 	@deno test --allow-all --unstable --coverage=cov
 	@deno coverage cov
