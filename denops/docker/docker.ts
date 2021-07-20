@@ -53,7 +53,7 @@ export async function removeContainer(
 }
 
 export async function containers(cli: HttpClient): Promise<Container[]> {
-  const resp = await cli.get<Container[]>("/containers/json?all=1");
+  const resp = await cli.get<Container[]>("/containers/json?all=true");
   return resp.body;
 }
 
