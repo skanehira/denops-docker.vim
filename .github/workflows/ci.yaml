@@ -1,0 +1,39 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+jobs:
+  lint:
+    strategy:
+      matrix:
+        deno-version: [v1.x]
+        os: [ubuntu-latest]
+    name: deno lint
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denoland/setup-deno@main
+        with:
+          deno-version: ${{ matrix.deno-version }}
+      - name: run lint
+        run: deno lint
+  test:
+    strategy:
+      matrix:
+        deno-version: [v1.x]
+        os: [ubuntu-latest]
+    name: deno test
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denoland/setup-deno@main
+        with:
+          deno-version: ${{ matrix.deno-version }}
+      - name: run test
+        run: make test
