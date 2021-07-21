@@ -11,3 +11,19 @@ export function formatBytes(bytes: number, decimals?: number) {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
+
+export function buildDockerCommand(line: string, command: string): string[] {
+  const cols = line.split(" ").filter((v) => v != "");
+  const result = command.match(/{(\d+)}/);
+  if (result) {
+    const target = result[0];
+    const idx = parseInt(result[1]);
+    if (cols.length <= idx) {
+      console.log(`out of index ${idx} in ${cols}`);
+      return [];
+    }
+    const cmd = command.replace(target, cols[idx]);
+    return cmd.split(" ");
+  }
+  return command.split(" ");
+}

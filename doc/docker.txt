@@ -168,6 +168,25 @@ default mappings
 ------------------------------------------------------------------------------
 FUNCTIONS					*docker-functions*
 
+docker#command({command})			*docker#command()*
+  Execute custom {command}.
+  {command} can use parameter like `{0}` to get some data
+  that displayed in buffer. For example,
+  if below line is displayed in buffer, `{0}` would get `70586698897d`,
+  `{1}` would get `sad_jemison`.
+>
+  70586698897d sad_jemison  golang:1.14.4...
+<
+  Also, you can use |autocmd| to define key map.
+  For example, the bellow setting is define key map to |docker-container|,
+  then press `T` to execute `docker top {container}`
+  >
+  augroup docker-custom-command
+    au!
+    au FileType docker-containers nnoremap <buffer> <silent> T :<C-u>call docker#command("docker top {0}")<CR>
+  augroup END
+<
+  NOTE: Only one parameter can be used
 
 ==============================================================================
 TODO						*docker-todo*

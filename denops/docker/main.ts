@@ -1,4 +1,7 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
+import { isString } from "https://deno.land/x/unknownutil@v1.0.0/mod.ts";
+import { runTerminal } from "./vim_util.ts";
+import { buildDockerCommand } from "./util.ts";
 import * as autocmd from "https://deno.land/x/denops_std@v1.0.0-beta.8/autocmd/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
@@ -86,6 +89,28 @@ export async function main(denops: Denops): Promise<void> {
   let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
+    async customCommand(command: unknown) {
+      if (isString(command)) {
+        const lnum = await denops.call("line", ".") as number;
+        if (lnum > 1) {
+          const line = await denops.call(
+            "getline",
+            lnum,
+          ) as string;
+
+          if (!line.length) {
+            return;
+          }
+          const cmd = buildDockerCommand(line, command);
+          if (cmd.length) {
+            runTerminal(denops, cmd);
+          }
+        }
+      }
+
+      return Promise.resolve();
+    },
+
     async runDockerCLI(...args: unknown[]) {
       await action.runDockerCLI(denops, args);
     },
