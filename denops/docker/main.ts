@@ -268,6 +268,17 @@ export async function main(denops: Denops): Promise<void> {
               rhs: "<Plug>(docker-container-inspect)",
             },
           },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "restartContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "r",
+              rhs: "<Plug>(docker-container-restart)",
+            },
+          },
         ],
       });
 
@@ -323,6 +334,16 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`stopping ${name}`);
       if (await action.stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
+        const containers = await action.getContainers(httpClient);
+        await bm.setbufline(containerBuffer.bufnr, 1, containers);
+      }
+    },
+
+    async restartContainer() {
+      const name = await getName(bm, containerBuffer.bufnr);
+      console.log(`restarting ${name}`);
+      if (await action.restartContainer(httpClient, name)) {
+        console.log(`restarted ${name}`);
         const containers = await action.getContainers(httpClient);
         await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }

@@ -163,3 +163,10 @@ export async function inspectContainer(
   const result = await denops.call("systemlist", cmd) as string[];
   return result;
 }
+
+export async function restartContainer(
+  cli: HttpClient,
+  name: string,
+): Promise<Response> {
+  return await cli.post(`/containers/${name}/restart`);
+}

@@ -24,6 +24,7 @@ This is the new version of [docker.vim](https://github.com/skanehira/docker.vim)
 - attach container
 - exec container
 - tail container log
+- restart container
 
 ## Author
 skanehira

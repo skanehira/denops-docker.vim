@@ -32,6 +32,14 @@ export async function attachContainer(denops: Denops, name: string) {
   await docker.attachContainer(denops, name);
 }
 
+export async function restartContainer(
+  httpClient: HttpClient,
+  name: string,
+): Promise<boolean> {
+  const resp = await docker.restartContainer(httpClient, name);
+  return resp.status < 300;
+}
+
 export async function execContainer(
   denops: Denops,
   name: string,
