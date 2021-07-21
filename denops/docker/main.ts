@@ -4,20 +4,7 @@ import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { Buffer, BufferManager } from "./vim_buffer.ts";
 import { defaultKeymap } from "./vim_map.ts";
-import {
-  attachContainer,
-  execContainer,
-  getContainers,
-  getImages,
-  pullImage,
-  quickrunImage,
-  removeContainer,
-  removeImage,
-  runDockerCLI,
-  searchImage,
-  startContainer,
-  stopContainer,
-} from "./action.ts";
+import * as action from "./action.ts";
 
 async function getID(bm: BufferManager, bufnr: number): Promise<string> {
   const line = await bm.getbufline(bufnr, 'line(".")');
@@ -100,7 +87,7 @@ export async function main(denops: Denops): Promise<void> {
 
   denops.dispatcher = {
     async runDockerCLI(...args: unknown[]) {
-      await runDockerCLI(denops, args);
+      await action.runDockerCLI(denops, args);
     },
     async dockerhub() {
       const term = await denops.eval(`input("term: ")`) as string;
@@ -126,7 +113,7 @@ export async function main(denops: Denops): Promise<void> {
           ],
         });
 
-        const images = await searchImage(httpClient, term);
+        const images = await action.searchImage(httpClient, term);
         await bm.setbufline(imageBuffer.bufnr, 1, images);
       } else {
         console.log("canceled");
@@ -176,7 +163,7 @@ export async function main(denops: Denops): Promise<void> {
           },
         ],
       });
-      const images = await getImages(httpClient);
+      const images = await action.getImages(httpClient);
       await bm.setbufline(imageBuffer.bufnr, 1, images);
     },
 
@@ -284,7 +271,7 @@ export async function main(denops: Denops): Promise<void> {
         ],
       });
 
-      const containers = await getContainers(httpClient);
+      const containers = await action.getContainers(httpClient);
       await bm.setbufline(containerBuffer.bufnr, 1, containers);
     },
 
@@ -300,12 +287,12 @@ export async function main(denops: Denops): Promise<void> {
 
     async pullImage() {
       const name = await getID(bm, imageBuffer.bufnr);
-      await pullImage(denops, name);
+      await action.pullImage(denops, name);
     },
 
     async attachContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
-      await attachContainer(denops, name);
+      await action.attachContainer(denops, name);
     },
 
     async execContainer() {
@@ -315,7 +302,7 @@ export async function main(denops: Denops): Promise<void> {
         const parts = input.split(" ");
         const cmd = parts.shift() as string;
         const args = parts;
-        await execContainer(denops, name, cmd, args);
+        await action.execContainer(denops, name, cmd, args);
       } else {
         console.log("canceled");
       }
@@ -324,9 +311,9 @@ export async function main(denops: Denops): Promise<void> {
     async startContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
       console.log(`starting ${name}`);
-      if (await startContainer(httpClient, name)) {
+      if (await action.startContainer(httpClient, name)) {
         console.log(`started ${name}`);
-        const containers = await getContainers(httpClient);
+        const containers = await action.getContainers(httpClient);
         await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
@@ -334,9 +321,9 @@ export async function main(denops: Denops): Promise<void> {
     async stopContainer() {
       const name = await getName(bm, containerBuffer.bufnr);
       console.log(`stopping ${name}`);
-      if (await stopContainer(httpClient, name)) {
+      if (await action.stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
-        const containers = await getContainers(httpClient);
+        const containers = await action.getContainers(httpClient);
         await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
@@ -346,7 +333,7 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`killing ${name}`);
       if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
-        const containers = await getContainers(httpClient);
+        const containers = await action.getContainers(httpClient);
         await bm.setbufline(containerBuffer.bufnr, 1, containers);
       }
     },
@@ -368,7 +355,7 @@ export async function main(denops: Denops): Promise<void> {
 
     async quickrunImage() {
       const name = await getRepoTag(bm, imageBuffer.bufnr);
-      await quickrunImage(denops, name);
+      await action.quickrunImage(denops, name);
     },
 
     async removeImage() {
@@ -377,9 +364,9 @@ export async function main(denops: Denops): Promise<void> {
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
       if (input && input === "y" || input === "Y") {
-        if (await removeImage(httpClient, name)) {
+        if (await action.removeImage(httpClient, name)) {
           console.log(`removed ${name}`);
-          const images = await getImages(httpClient);
+          const images = await action.getImages(httpClient);
           await bm.setbufline(imageBuffer.bufnr, 1, images);
         }
       } else {
@@ -393,9 +380,9 @@ export async function main(denops: Denops): Promise<void> {
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
       if (input && input === "y" || input === "Y") {
-        if (await removeContainer(httpClient, name)) {
+        if (await action.removeContainer(httpClient, name)) {
           console.log(`removed ${name}`);
-          const containers = await getContainers(httpClient);
+          const containers = await action.getContainers(httpClient);
           await bm.setbufline(containerBuffer.bufnr, 1, containers);
         }
       } else {
