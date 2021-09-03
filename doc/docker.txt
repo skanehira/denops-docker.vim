@@ -73,6 +73,9 @@ COMMANDS					*docker-commands*
 :DockerSearchImage				*:DockerSearchImage*
   Open buffer of |docker-hub|
 
+:DockerAttacContainer				*:DockerAttacContainer*
+  Attach specify container
+
 ------------------------------------------------------------------------------
 BUFFER							*docker-buffers*
 

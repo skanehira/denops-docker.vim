@@ -50,6 +50,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerContainers :drop docker://containers`,
     `command! DockerSearchImage :drop docker://hub`,
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
+    `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttacContainer :call docker#attachContainer(<f-args>)`,
   ];
 
   commands.forEach((cmd) => {
@@ -89,6 +90,22 @@ export async function main(denops: Denops): Promise<void> {
   let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
+    async listContainer() {
+      const containers = await docker.containers(httpClient);
+      return containers.filter((c) => {
+        if (c.State === "running") {
+          return c;
+        }
+      }).map((c) => {
+        return c.Names[0].substring(1);
+      });
+    },
+
+    async containerAttach(arg: unknown) {
+      const name = arg as string;
+      await action.attachContainer(denops, name);
+    },
+
     async customCommand(command: unknown) {
       if (isString(command)) {
         const lnum = await denops.call("line", ".") as number;
