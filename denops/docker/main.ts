@@ -321,11 +321,29 @@ export async function main(denops: Denops): Promise<void> {
               rhs: "<Plug>(docker-container-restart)",
             },
           },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "copyFileToContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "map",
+              lhs: "ct",
+              rhs: "<Plug>(docker-container-copy-to)",
+            },
+          },
         ],
       });
 
       const containers = await action.getContainers(httpClient);
       await bm.setbufline(containerBuffer.bufnr, 1, containers);
+    },
+
+    async copyFileToContainer(): Promise<void> {
+      const from = await denops.call("input", "from: ", "", "file") as string;
+      const to = await denops.call("input", "to: ") as string;
+      const name = await getName(bm, containerBuffer.bufnr);
+      await action.copyFileToContainer(name, from, to);
     },
 
     beforeContainersBufferDelete() {

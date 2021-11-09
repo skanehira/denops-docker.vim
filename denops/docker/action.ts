@@ -100,3 +100,11 @@ export async function removeContainer(httpClient: HttpClient, name: string) {
   const resp = await docker.removeContainer(httpClient, name);
   return resp.status <= 300;
 }
+
+export async function copyFileToContainer(
+  id: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  await docker.copyFileToContainer(id, from, to);
+}

@@ -9,6 +9,8 @@ import {
   SearchImage,
 } from "./types.ts";
 
+const dec = new TextDecoder();
+
 export async function images(cli: HttpClient): Promise<Image[]> {
   const resp = await cli.get<Image[]>("/images/json");
   return resp.body;
@@ -59,7 +61,7 @@ export async function containers(cli: HttpClient): Promise<Container[]> {
 
 export async function pullImage(denops: Denops, name: string) {
   const [image, tag] = name.split(":");
-  const fromImage = [image, ":", (tag || "latest")].join("");
+  const fromImage = [image, ":", tag || "latest"].join("");
   await runTerminal(denops, ["docker", "pull", fromImage]);
 }
 
@@ -169,4 +171,33 @@ export async function restartContainer(
   name: string,
 ): Promise<Response> {
   return await cli.post(`/containers/${name}/restart`);
+}
+
+export async function copyFileToContainer(
+  id: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  const opt: Deno.RunOptions = {
+    cmd: [
+      "docker",
+      "cp",
+      from,
+      `${id}:${to}`,
+    ],
+    stdin: "null",
+    stdout: "null",
+    stderr: "piped",
+  };
+
+  const p = Deno.run(opt);
+  const status = await p.status();
+  if (!status.success) {
+    const error = await p.stderrOutput();
+    throw new Error(`failed to copy file to container: ${dec.decode(error)}`);
+  } else {
+    console.log(`success to copy ${from} to ${id}:${to}`);
+  }
+  p.stderr?.close();
+  p.close();
 }
