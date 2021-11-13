@@ -169,6 +169,7 @@ default mappings
 			`normal`	q	<Plug>(docker-buffer-close)
 			`normal`	r	<Plug>(docker-container-restart)
 			`normal`	ct	<Plug>(docker-container-copy-to)
+			`normal`	cf	<Plug>(docker-container-copy-from)
 |docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
 			`normal`	q	<Plug>(docker-buffer-close)
 

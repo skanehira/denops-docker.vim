@@ -195,8 +195,33 @@ export async function copyFileToContainer(
   if (!status.success) {
     const error = await p.stderrOutput();
     throw new Error(`failed to copy file to container: ${dec.decode(error)}`);
-  } else {
-    console.log(`success to copy ${from} to ${id}:${to}`);
+  }
+  p.stderr?.close();
+  p.close();
+}
+
+export async function copyFileFromContainer(
+  id: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  const opt: Deno.RunOptions = {
+    cmd: [
+      "docker",
+      "cp",
+      `${id}:${from}`,
+      to,
+    ],
+    stdin: "null",
+    stdout: "null",
+    stderr: "piped",
+  };
+
+  const p = Deno.run(opt);
+  const status = await p.status();
+  if (!status.success) {
+    const error = await p.stderrOutput();
+    throw new Error(`failed to copy file from container: ${dec.decode(error)}`);
   }
   p.stderr?.close();
   p.close();

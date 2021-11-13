@@ -332,6 +332,17 @@ export async function main(denops: Denops): Promise<void> {
               rhs: "<Plug>(docker-container-copy-to)",
             },
           },
+          {
+            mode: "nnoremap",
+            rhs:
+              `:call denops#notify("${denops.name}", "copyFileFromContainer", [])<CR>`,
+            args: ["<buffer>", "<silent>"],
+            alias: {
+              mode: "nmap",
+              lhs: "cf",
+              rhs: "<Plug>(docker-container-copy-from)",
+            },
+          },
         ],
       });
 
@@ -344,6 +355,15 @@ export async function main(denops: Denops): Promise<void> {
       const to = await denops.call("input", "to: ") as string;
       const name = await getName(bm, containerBuffer.bufnr);
       await action.copyFileToContainer(name, from, to);
+      console.log(`success to copy ${from} to ${name}:${to}`);
+    },
+
+    async copyFileFromContainer(): Promise<void> {
+      const from = await denops.call("input", "from: ") as string;
+      const to = await denops.call("input", "to: ", "", "file") as string;
+      const name = await getName(bm, containerBuffer.bufnr);
+      await action.copyFileFromContainer(name, from, to);
+      console.log(`success to copy ${name}:${from} to ${to}`);
     },
 
     beforeContainersBufferDelete() {

@@ -108,3 +108,11 @@ export async function copyFileToContainer(
 ): Promise<void> {
   await docker.copyFileToContainer(id, from, to);
 }
+
+export async function copyFileFromContainer(
+  id: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  await docker.copyFileFromContainer(id, from, to);
+}
