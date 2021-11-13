@@ -145,6 +145,9 @@ KEY-MAPPINGS					*docker-key-mappings*
 <Plug>(docker-container-copy-to)		*<Plug>(docker-container-copy-to)*
   Copy file to a container.
 
+<Plug>(docker-container-copy-from)		*<Plug>(docker-container-copy-from)*
+  Copy file to from a container.
+
 <Plug>(docker-pull-image)			*<Plug>(docker-pull-image)*
   Pull specified image in |docker-hub|
 
