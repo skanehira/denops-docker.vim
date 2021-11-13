@@ -225,7 +225,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "u",
               rhs: "<Plug>(docker-container-start)",
             },
@@ -236,7 +236,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "d",
               rhs: "<Plug>(docker-container-stop)",
             },
@@ -247,7 +247,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "<C-k>",
               rhs: "<Plug>(docker-container-kill)",
             },
@@ -258,7 +258,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "a",
               rhs: "<Plug>(docker-container-attach)",
             },
@@ -270,7 +270,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "e",
               rhs: "<Plug>(docker-contianer-exec)",
             },
@@ -282,7 +282,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "t",
               rhs: "<Plug>(docker-container-log)",
             },
@@ -294,7 +294,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "<C-d>",
               rhs: "<Plug>(docker-container-remove)",
             },
@@ -305,7 +305,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "<CR>",
               rhs: "<Plug>(docker-container-inspect)",
             },
@@ -316,7 +316,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "restartContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "r",
               rhs: "<Plug>(docker-container-restart)",
             },
@@ -327,7 +327,7 @@ export async function main(denops: Denops): Promise<void> {
               `:call denops#notify("${denops.name}", "copyFileToContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
             alias: {
-              mode: "map",
+              mode: "nmap",
               lhs: "ct",
               rhs: "<Plug>(docker-container-copy-to)",
             },
