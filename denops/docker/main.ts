@@ -1,8 +1,6 @@
-import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
-import { isString } from "https://deno.land/x/unknownutil@v1.0.0/mod.ts";
+import { autocmd, Denops, isString } from "./deps.ts";
 import { runTerminal } from "./vim_util.ts";
 import { buildDockerCommand } from "./util.ts";
-import * as autocmd from "https://deno.land/x/denops_std@v1.0.0-beta.8/autocmd/mod.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
 import { Buffer, BufferManager } from "./vim_buffer.ts";
@@ -152,6 +150,17 @@ export async function main(denops: Denops): Promise<void> {
                 rhs: "<Plug>(docker-pull-image)",
               },
             },
+            {
+              mode: "nnoremap",
+              rhs:
+                `:call denops#notify("${denops.name}", "openDockerHub", [])<CR>`,
+              args: ["<buffer>", "<silent>"],
+              alias: {
+                mode: "map",
+                lhs: "<C-o>",
+                rhs: "<Plug>(docker-open-dockerhub)",
+              },
+            },
           ],
         });
 
@@ -160,6 +169,11 @@ export async function main(denops: Denops): Promise<void> {
       } else {
         console.log("canceled");
       }
+    },
+
+    async openDockerHub(): Promise<void> {
+      console.log("open docker hub");
+      await Promise.resolve();
     },
 
     async images() {

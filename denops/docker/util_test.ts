@@ -1,5 +1,5 @@
 import { buildDockerCommand } from "./util.ts";
-import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
+import { assertEquals } from "./deps.ts";
 
 const buildDockerCommandTests = [
   {

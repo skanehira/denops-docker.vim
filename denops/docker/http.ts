@@ -1,22 +1,16 @@
-import { BufReader } from "https://deno.land/std@0.97.0/io/bufio.ts";
-import { TextProtoReader } from "https://deno.land/std@0.97.0/textproto/mod.ts";
-import {
-  bodyReader,
-  chunkedBodyReader,
-} from "https://deno.land/std@0.97.0/http/_io.ts";
 import {
   BodyReader,
-  IncomingResponse,
-} from "https://deno.land/x/servest@v1.3.1/mod.ts";
-import {
+  bodyReader,
+  BufReader,
+  chunkedBodyReader,
   closableBodyReader,
-  timeoutReader,
-} from "https://deno.land/x/servest@v1.3.1/_readers.ts";
-import { UnexpectedEofError } from "https://deno.land/x/servest@v1.3.1/error.ts";
-import {
+  createBodyParser,
+  IncomingResponse,
   promiseInterrupter,
-} from "https://deno.land/x/servest@v1.3.1/_util.ts";
-import { createBodyParser } from "https://deno.land/x/servest@v1.3.1/body_parser.ts";
+  TextProtoReader,
+  timeoutReader,
+  UnexpectedEofError,
+} from "./deps.ts";
 
 import { connect } from "./socket.ts";
 
@@ -161,9 +155,9 @@ export class HttpClient {
 }
 
 /**
-  * from https://deno.land/x/servest@v1.3.1/serveio.ts
-  *
-  * read http response from reader */
+ * from https://deno.land/x/servest@v1.3.4/serveio.ts
+ *
+ * read http response from reader */
 export async function readResponse(
   r: Deno.Reader,
   { timeout, cancel }: { timeout?: number; cancel?: Promise<void> } = {},

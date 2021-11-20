@@ -1,4 +1,4 @@
-import { Denops } from "https://deno.land/x/denops_std@v1.0.0-beta.8/mod.ts";
+import { Denops } from "./deps.ts";
 import { HttpClient } from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";

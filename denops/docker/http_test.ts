@@ -1,6 +1,6 @@
 import { writeConn } from "./testutil.ts";
 import { HttpClient } from "./http.ts";
-import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
+import { assertEquals } from "./deps.ts";
 import { connect } from "./socket.ts";
 
 Deno.test("http get 200", async () => {

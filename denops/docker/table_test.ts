@@ -1,6 +1,6 @@
 import { makeTableString } from "./table.ts";
 import { Image } from "./types.ts";
-import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
+import { assertEquals } from "./deps.ts";
 import { readFile, readJSON } from "./testutil.ts";
 
 const tests = [
