@@ -16,3 +16,8 @@ function! docker#attachContainer(name) abort
   let s:containers = []
   call denops#notify("docker", "containerAttach", [a:name])
 endfunction
+
+function! docker#showContainerLog(name) abort
+  let s:containers = []
+  call denops#notify("docker", "tailContainerLogs", [a:name])
+endfunction

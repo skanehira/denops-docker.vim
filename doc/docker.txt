@@ -74,7 +74,10 @@ COMMANDS					*docker-commands*
   Open buffer of |docker-hub|
 
 :DockerAttacContainer				*:DockerAttacContainer*
-  Attach specify container
+  Attach specific container
+
+:DockerShowContainerLog				*:DockerShowContainerLog*
+  Show specific container log
 
 ------------------------------------------------------------------------------
 BUFFER							*docker-buffers*

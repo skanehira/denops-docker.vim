@@ -49,6 +49,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerSearchImage :drop docker://hub`,
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttacContainer :call docker#attachContainer(<f-args>)`,
+    `command! -nargs=1 -complete=customlist,docker#listContainer DockerShowContainerLog :call docker#showContainerLog(<f-args>)`,
   ];
 
   commands.forEach((cmd) => {
@@ -279,7 +280,6 @@ export async function main(denops: Denops): Promise<void> {
           },
           {
             mode: "nnoremap",
-
             rhs:
               `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
@@ -291,7 +291,6 @@ export async function main(denops: Denops): Promise<void> {
           },
           {
             mode: "nnoremap",
-
             rhs:
               `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
             args: ["<buffer>", "<silent>"],
@@ -303,7 +302,6 @@ export async function main(denops: Denops): Promise<void> {
           },
           {
             mode: "nnoremap",
-
             rhs:
               `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
             args: ["<buffer>", "<silent>"],
@@ -453,8 +451,12 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async tailContainerLogs() {
-      const name = await getName(bm, containerBuffer.bufnr);
+    async tailContainerLogs(arg: unknown) {
+      if (!isString(arg)) {
+        console.error("arg type is not string");
+        return;
+      }
+      const name = arg || await getName(bm, containerBuffer.bufnr);
       await docker.tailContainerLogs(denops, name);
     },
 
