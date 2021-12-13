@@ -452,11 +452,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async tailContainerLogs(arg: unknown) {
-      if (!isString(arg)) {
-        console.error("arg type is not string");
-        return;
-      }
-      const name = arg || await getName(bm, containerBuffer.bufnr);
+      const name = (arg as string) || await getName(bm, containerBuffer.bufnr);
       await docker.tailContainerLogs(denops, name);
     },
 
