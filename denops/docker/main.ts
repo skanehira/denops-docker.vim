@@ -48,7 +48,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerContainers :drop docker://containers`,
     `command! DockerSearchImage :drop docker://hub`,
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
-    `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttacContainer :call docker#attachContainer(<f-args>)`,
+    `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttachContainer :call docker#attachContainer(<f-args>)`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerShowContainerLog :call docker#showContainerLog(<f-args>)`,
   ];
 
@@ -286,7 +286,7 @@ export async function main(denops: Denops): Promise<void> {
             alias: {
               mode: "nmap",
               lhs: "e",
-              rhs: "<Plug>(docker-contianer-exec)",
+              rhs: "<Plug>(docker-container-exec)",
             },
           },
           {

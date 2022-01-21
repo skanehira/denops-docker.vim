@@ -73,7 +73,7 @@ COMMANDS					*docker-commands*
 :DockerSearchImage				*:DockerSearchImage*
   Open buffer of |docker-hub|
 
-:DockerAttacContainer				*:DockerAttacContainer*
+:DockerAttachContainer				*:DockerAttachContainer*
   Attach specific container
 
 :DockerShowContainerLog				*:DockerShowContainerLog*
