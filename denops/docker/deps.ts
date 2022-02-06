@@ -21,3 +21,6 @@ export {
 export { createBodyParser } from "https://deno.land/x/servest@v1.3.4/body_parser.ts";
 
 export { datetime } from "https://deno.land/x/ptera@v1.0.0-beta/mod.ts";
+export * as mapping from "https://deno.land/x/denops_std@v2.0.0/mapping/mod.ts";
+export * as mapType from "https://deno.land/x/denops_std@v2.0.0/mapping/types.ts";
+export * as vars from "https://deno.land/x/denops_std@v2.2.0/variable/mod.ts";

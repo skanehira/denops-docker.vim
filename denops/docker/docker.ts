@@ -16,7 +16,7 @@ export async function images(cli: HttpClient): Promise<Image[]> {
   return resp.body;
 }
 
-export async function inspectImage(
+export async function inspect(
   denops: Denops,
   id: string,
 ): Promise<string[]> {
