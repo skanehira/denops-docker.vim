@@ -339,7 +339,8 @@ export async function main(denops: Denops): Promise<void> {
 
     async attachContainer() {
       const container = await getContainer(denops);
-      await action.attachContainer(denops, container.Names[0].substring(1));
+      const name = container.Names[0].substring(1);
+      await action.attachContainer(denops, name);
     },
 
     async execContainer() {
@@ -419,7 +420,9 @@ export async function main(denops: Denops): Promise<void> {
 
     async removeImage() {
       const image = await getImage(denops);
-      const name = image.RepoTags[0];
+      const name = image.RepoTags[0] === "<none>:<none>"
+        ? image.Id.substring(7)
+        : image.RepoTags[0];
       const input = await denops.eval(
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
@@ -427,6 +430,7 @@ export async function main(denops: Denops): Promise<void> {
         if (await action.removeImage(httpClient, name)) {
           console.log(`removed ${name}`);
           await denops.cmd("e");
+          await denops.call("feedkeys", "\<C-o>");
         }
       } else {
         console.log("canceled");
