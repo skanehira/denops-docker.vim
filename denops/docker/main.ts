@@ -149,10 +149,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async images() {
-      await denops.cmd("setlocal modifiable");
-      const images = await docker.images(httpClient);
-      await vars.b.set(denops, "docker_images", images);
-      await denops.call("setline", 1, makeTableString(images));
+      await action.updateImagesBuffer(denops, httpClient);
 
       const ft = "docker-images";
       await denops.cmd(
@@ -204,10 +201,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async containers() {
-      await denops.cmd(`setlocal modifiable`);
-      const containers = await docker.containers(httpClient);
-      await vars.b.set(denops, "docker_containers", containers);
-      await denops.call("setline", 1, makeTableString(containers));
+      await action.updateContainersBuffer(denops, httpClient);
 
       const ft = "docker-containers";
       await denops.cmd(
@@ -361,7 +355,7 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`starting ${name}`);
       if (await action.startContainer(httpClient, name)) {
         console.log(`started ${name}`);
-        await denops.cmd("e");
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
@@ -371,7 +365,7 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`stopping ${name}`);
       if (await action.stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
-        await denops.cmd("e");
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
@@ -381,7 +375,7 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`restarting ${name}`);
       if (await action.restartContainer(httpClient, name)) {
         console.log(`restarted ${name}`);
-        await denops.cmd("e");
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
@@ -391,7 +385,7 @@ export async function main(denops: Denops): Promise<void> {
       console.log(`killing ${name}`);
       if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
-        await denops.cmd("e");
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
@@ -429,8 +423,7 @@ export async function main(denops: Denops): Promise<void> {
       if (input && input === "y" || input === "Y") {
         if (await action.removeImage(httpClient, name)) {
           console.log(`removed ${name}`);
-          await denops.cmd("e");
-          await denops.call("feedkeys", "\<C-o>");
+          await action.updateImagesBuffer(denops, httpClient);
         }
       } else {
         console.log("canceled");
@@ -446,7 +439,7 @@ export async function main(denops: Denops): Promise<void> {
       if (input && input === "y" || input === "Y") {
         if (await action.removeContainer(httpClient, name)) {
           console.log(`removed ${name}`);
-          await denops.cmd("e");
+          await action.updateContainersBuffer(denops, httpClient);
         }
       } else {
         console.log("canceled");

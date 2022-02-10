@@ -3,6 +3,7 @@ import { HttpClient } from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
+import { vars } from "./deps.ts";
 
 export async function runDockerCLI(denops: Denops, args: unknown[]) {
   const cmd = new Array<string>("docker");
@@ -126,4 +127,34 @@ export async function inspect(denops: Denops, id: string) {
   await denops.cmd(
     "setlocal ft=json buftype=nofile bufhidden=hide nolist nomodifiable nomodified",
   );
+}
+
+export async function updateContainersBuffer(
+  denops: Denops,
+  httpClient: HttpClient,
+) {
+  const pos = await denops.call("getcurpos");
+  await denops.cmd(`setlocal modifiable`);
+  const containers = await docker.containers(httpClient);
+  await vars.b.set(denops, "docker_containers", containers);
+  await denops.batch(["setline", 1, makeTableString(containers)], [
+    "setpos",
+    ".",
+    pos,
+  ]);
+}
+
+export async function updateImagesBuffer(
+  denops: Denops,
+  httpClient: HttpClient,
+) {
+  const pos = await denops.call("getcurpos");
+  await denops.cmd("setlocal modifiable");
+  const images = await docker.images(httpClient);
+  await vars.b.set(denops, "docker_images", images);
+  await denops.batch(["setline", 1, makeTableString(images)], [
+    "setpos",
+    ".",
+    pos,
+  ]);
 }
