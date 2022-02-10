@@ -125,7 +125,7 @@ export async function inspect(denops: Denops, id: string) {
   const result = await docker.inspect(denops, id);
   await denops.call("setline", 1, result);
   await denops.cmd(
-    "setlocal ft=json buftype=nofile bufhidden=hide nolist nomodifiable nomodified",
+    "setlocal ft=json buftype=nofile bufhidden=wipe nolist nomodifiable nomodified",
   );
 }
 
