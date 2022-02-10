@@ -13,7 +13,20 @@ const dec = new TextDecoder();
 
 export async function images(cli: HttpClient): Promise<Image[]> {
   const resp = await cli.get<Image[]>("/images/json");
-  return resp.body;
+  const images: Image[] = [];
+  // NOTE: to be able remove image when same id
+  for (const image of resp.body) {
+    if (image.RepoTags && image.RepoTags.length > 1) {
+      for (const tag of image.RepoTags) {
+        const i: Image = Object.assign({}, image);
+        i.RepoTags = [tag];
+        images.push(i);
+      }
+    } else {
+      images.push(image);
+    }
+  }
+  return images;
 }
 
 export async function inspect(
