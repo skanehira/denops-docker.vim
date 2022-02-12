@@ -134,7 +134,7 @@ export async function updateContainersBuffer(
   httpClient: HttpClient,
 ) {
   const pos = await denops.call("getcurpos");
-  await denops.cmd("silent setlocal modifiable | %d_");
+  await denops.cmd("setlocal modifiable | silent %d_");
   const containers = await docker.containers(httpClient);
   await vars.b.set(denops, "docker_containers", containers);
   await denops.batch(["setline", 1, makeTableString(containers)], [
@@ -149,7 +149,7 @@ export async function updateImagesBuffer(
   httpClient: HttpClient,
 ) {
   const pos = await denops.call("getcurpos");
-  await denops.cmd("silent setlocal modifiable | %d_");
+  await denops.cmd("setlocal modifiable | silent %d_");
   const images = await docker.images(httpClient);
   await vars.b.set(denops, "docker_images", images);
   await denops.batch(["setline", 1, makeTableString(images)], [
