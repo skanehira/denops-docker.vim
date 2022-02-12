@@ -52,6 +52,20 @@ export async function getImage(denops: Denops): Promise<Image> {
   return await getEntry<Image>(denops, "docker_images");
 }
 
+export async function getImageName(denops: Denops): Promise<string> {
+  const image = await getImage(denops);
+  let name: string;
+  if (
+    !image.RepoTags ||
+    (image.RepoTags && image.RepoTags[0] === "<none>:<none>")
+  ) {
+    name = image.Id.substring(7);
+  } else {
+    name = image.RepoTags[0];
+  }
+  return name;
+}
+
 export async function getSearchImage(denops: Denops): Promise<SearchImage> {
   return await getEntry<SearchImage>(denops, "docker_images");
 }

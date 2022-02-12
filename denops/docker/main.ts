@@ -4,6 +4,7 @@ import {
   buildDockerCommand,
   getContainer,
   getImage,
+  getImageName,
   getSearchImage,
 } from "./util.ts";
 import { HttpClient } from "./http.ts";
@@ -395,8 +396,7 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async inspectImage() {
-      const image = await getImage(denops);
-      const name = image.RepoTags[0];
+      const name = await getImageName(denops);
       await action.inspect(denops, name);
     },
 
@@ -407,16 +407,12 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async quickrunImage() {
-      const image = await getImage(denops);
-      const name = image.RepoTags[0];
+      const name = await getImageName(denops);
       await action.quickrunImage(denops, name);
     },
 
     async removeImage() {
-      const image = await getImage(denops);
-      const name = image.RepoTags[0] === "<none>:<none>"
-        ? image.Id.substring(7)
-        : image.RepoTags[0];
+      const name = await getImageName(denops);
       const input = await denops.eval(
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
