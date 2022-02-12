@@ -3,7 +3,6 @@ import { runTerminal } from "./vim_util.ts";
 import {
   buildDockerCommand,
   getContainer,
-  getImage,
   getImageName,
   getSearchImage,
 } from "./util.ts";
