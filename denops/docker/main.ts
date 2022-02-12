@@ -1,52 +1,24 @@
 import { autocmd, Denops, isString } from "./deps.ts";
 import { runTerminal } from "./vim_util.ts";
-import { buildDockerCommand } from "./util.ts";
+import {
+  buildDockerCommand,
+  getContainer,
+  getImageName,
+  getSearchImage,
+} from "./util.ts";
 import { HttpClient } from "./http.ts";
 import * as docker from "./docker.ts";
-import { Buffer, BufferManager } from "./vim_buffer.ts";
-import { defaultKeymap } from "./vim_map.ts";
 import * as action from "./action.ts";
-
-async function getID(bm: BufferManager, bufnr: number): Promise<string> {
-  const line = await bm.getbufline(bufnr, 'line(".")');
-  const [id] = line[0].split(" ", 1);
-  return id;
-}
-
-async function getName(bm: BufferManager, bufnr: number): Promise<string> {
-  const line = await bm.getbufline(bufnr, 'line(".")');
-  const [_, name] = line[0].split(" ", 2);
-  return name;
-}
-
-async function getRepoTag(bm: BufferManager, bufnr: number): Promise<string> {
-  const line = await bm.getbufline(bufnr, 'line(".")');
-  const [_, repo, tag] = line[0].split(" ").filter((v) => v != "");
-  return `${repo}:${tag}`;
-}
-
-async function inspect(denops: Denops, bm: BufferManager, id: string) {
-  const result = await docker.inspectImage(denops, id);
-  const buf = await bm.newBuffer({
-    name: id,
-    opener: "drop",
-    buftype: "nofile",
-    ft: "json",
-    maps: [
-      defaultKeymap.bufferClose,
-    ],
-  });
-  await bm.setbufline(buf.bufnr, 1, result);
-}
+import { makeTableString } from "./table.ts";
+import { mapping, mapType, vars } from "./deps.ts";
 
 export async function main(denops: Denops): Promise<void> {
-  const bm = BufferManager.get(denops);
   const httpClient = await HttpClient.get();
 
   const commands: string[] = [
-    `command! DockerImages :drop docker://images`,
-    `command! DockerContainers :drop docker://containers`,
-    `command! DockerSearchImage :drop docker://hub`,
+    `command! DockerImages :e docker://images`,
+    `command! DockerContainers :e docker://containers`,
+    `command! DockerSearchImage :e docker://hub`,
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttachContainer :call docker#attachContainer(<f-args>)`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerShowContainerLog :call docker#showContainerLog(<f-args>)`,
@@ -68,25 +40,11 @@ export async function main(denops: Denops): Promise<void> {
       `call denops#notify("${denops.name}", "images", [])`,
     );
     helper.define(
-      "BufWipeout",
-      "docker://images",
-      `call denops#notify("${denops.name}", "beforeImagesBufferDelete", [])`,
-    );
-    helper.define(
-      "BufWipeout",
-      "docker://containers",
-      `call denops#notify("${denops.name}", "beforeContainersBufferDelete", [])`,
-    );
-
-    helper.define(
       "BufReadCmd",
       "docker://hub",
       `call denops#notify("${denops.name}", "dockerhub", [])`,
     );
   });
-
-  let containerBuffer = { bufnr: -1 } as Buffer;
-  let imageBuffer = { bufnr: -1 } as Buffer;
 
   denops.dispatcher = {
     async listContainer() {
@@ -130,43 +88,56 @@ export async function main(denops: Denops): Promise<void> {
     async runDockerCLI(...args: unknown[]) {
       await action.runDockerCLI(denops, args);
     },
+
     async dockerhub() {
       const term = await denops.eval(`input("term: ")`) as string;
       if (term) {
-        imageBuffer = await bm.newBuffer({
-          name: "docker://hub",
-          opener: "drop",
-          ft: "docker-hub",
-          buftype: "nofile",
-          modifiable: false,
-          maps: [
-            defaultKeymap.bufferClose,
-            {
-              mode: "nnoremap",
-              rhs: `:call denops#notify("${denops.name}", "pullImage", [])<CR>`,
-              args: ["<buffer>", "<silent>"],
-              alias: {
-                mode: "map",
-                lhs: "<CR>",
-                rhs: "<Plug>(docker-pull-image)",
-              },
-            },
-            {
-              mode: "nnoremap",
-              rhs:
-                `:call denops#notify("${denops.name}", "openDockerHub", [])<CR>`,
-              args: ["<buffer>", "<silent>"],
-              alias: {
-                mode: "map",
-                lhs: "<C-o>",
-                rhs: "<Plug>(docker-open-dockerhub)",
-              },
-            },
-          ],
-        });
+        const images = await docker.searchImage(httpClient, term);
+        await vars.b.set(denops, "docker_images", images);
+        await denops.call("setline", 1, makeTableString(images));
+        await denops.cmd("setlocal modifiable");
+        const ft = "docker-hub";
+        await denops.cmd(
+          `setlocal ft=${ft} buftype=nofile nowrap nomodifiable bufhidden=hide nolist nomodified`,
+        );
 
-        const images = await action.searchImage(httpClient, term);
-        await bm.setbufline(imageBuffer.bufnr, 1, images);
+        const keymaps = [
+          {
+            mode: ["n"],
+            lhs: "<Plug>(docker-buffer-close)",
+            rhs: `:bw<CR>`,
+            default: "q",
+          },
+          {
+            mode: ["n"],
+            lhs: "<Plug>(docker-pull-image)",
+            rhs: `:call denops#notify("${denops.name}", "pullImage", [])<CR>`,
+            default: "<CR>",
+          },
+          {
+            mode: ["n"],
+            lhs: "<Plug>(docker-open-dockerhub)",
+            rhs:
+              `:call denops#notify("${denops.name}", "openDockerHub", [])<CR>`,
+            default: "<C-o>",
+          },
+        ];
+
+        for (const m of keymaps) {
+          mapping.map(denops, m.lhs, m.rhs, {
+            mode: m.mode as mapType.Mode[],
+            buffer: true,
+            silent: true,
+            noremap: true,
+          });
+
+          // defualt mapping
+          mapping.map(denops, m.default, m.lhs, {
+            mode: "n",
+            buffer: true,
+            silent: true,
+          });
+        }
       } else {
         console.log("canceled");
       }
@@ -178,194 +149,170 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async images() {
-      imageBuffer = await bm.newBuffer({
-        name: "docker://images",
-        opener: "drop",
-        ft: "docker-images",
-        buftype: "nofile",
-        modifiable: false,
-        maps: [
-          defaultKeymap.bufferClose,
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "map",
-              lhs: "r",
-              rhs: "<Plug>(docker-image-quickrun)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "map",
-              lhs: "<CR>",
-              rhs: "<Plug>(docker-image-inspect)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs: `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "map",
-              lhs: "<C-d>",
-              rhs: "<Plug>(docker-image-remove)",
-            },
-          },
-        ],
-      });
-      const images = await action.getImages(httpClient);
-      await bm.setbufline(imageBuffer.bufnr, 1, images);
+      await action.updateImagesBuffer(denops, httpClient);
+
+      const ft = "docker-images";
+      await denops.cmd(
+        `setlocal ft=${ft} buftype=nofile nowrap nomodifiable bufhidden=hide nolist nomodified`,
+      );
+
+      const keymaps = [
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-buffer-close)",
+          rhs: `:bw<CR>`,
+          default: "q",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-image-quickrun)",
+          rhs: `:call denops#notify("${denops.name}", "quickrunImage", [])<CR>`,
+          default: "r",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-image-remove)",
+          rhs: `:call denops#notify("${denops.name}", "removeImage", [])<CR>`,
+          default: "<C-d>",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-image-inspect)",
+          rhs: `:call denops#notify("${denops.name}", "inspectImage", [])<CR>`,
+          default: "<CR>",
+        },
+      ];
+
+      for (const m of keymaps) {
+        mapping.map(denops, m.lhs, m.rhs, {
+          mode: m.mode as mapType.Mode[],
+          buffer: true,
+          silent: true,
+          noremap: true,
+        });
+
+        // defualt mapping
+        mapping.map(denops, m.default, m.lhs, {
+          mode: "n",
+          buffer: true,
+          silent: true,
+        });
+      }
     },
 
     async containers() {
-      containerBuffer = await bm.newBuffer({
-        name: "docker://containers",
-        opener: "drop",
-        ft: "docker-containers",
-        buftype: "nofile",
-        wrap: "nowrap",
-        modifiable: false,
-        maps: [
-          defaultKeymap.bufferClose,
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "u",
-              rhs: "<Plug>(docker-container-start)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "d",
-              rhs: "<Plug>(docker-container-stop)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "<C-k>",
-              rhs: "<Plug>(docker-container-kill)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "a",
-              rhs: "<Plug>(docker-container-attach)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "e",
-              rhs: "<Plug>(docker-container-exec)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "t",
-              rhs: "<Plug>(docker-container-log)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "<C-d>",
-              rhs: "<Plug>(docker-container-remove)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "<CR>",
-              rhs: "<Plug>(docker-container-inspect)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "restartContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "r",
-              rhs: "<Plug>(docker-container-restart)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "copyFileToContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "ct",
-              rhs: "<Plug>(docker-container-copy-to)",
-            },
-          },
-          {
-            mode: "nnoremap",
-            rhs:
-              `:call denops#notify("${denops.name}", "copyFileFromContainer", [])<CR>`,
-            args: ["<buffer>", "<silent>"],
-            alias: {
-              mode: "nmap",
-              lhs: "cf",
-              rhs: "<Plug>(docker-container-copy-from)",
-            },
-          },
-        ],
-      });
+      await action.updateContainersBuffer(denops, httpClient);
 
-      const containers = await action.getContainers(httpClient);
-      await bm.setbufline(containerBuffer.bufnr, 1, containers);
+      const ft = "docker-containers";
+      await denops.cmd(
+        `setlocal ft=${ft} buftype=nofile nowrap nomodifiable bufhidden=hide nolist nomodified`,
+      );
+
+      const keymaps = [
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-buffer-close)",
+          rhs: `:bw<CR>`,
+          default: "q",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-start)",
+          rhs:
+            `:call denops#notify("${denops.name}", "startContainer", [])<CR>`,
+          default: "u",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-stop)",
+          rhs: `:call denops#notify("${denops.name}", "stopContainer", [])<CR>`,
+          default: "d",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-kill)",
+          rhs: `:call denops#notify("${denops.name}", "killContainer", [])<CR>`,
+          default: "<C-k>",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-attach)",
+          rhs:
+            `:call denops#notify("${denops.name}", "attachContainer", [])<CR>`,
+          default: "a",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-contianer-exec)",
+          rhs: `:call denops#notify("${denops.name}", "execContainer", [])<CR>`,
+          default: "e",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-log)",
+          rhs:
+            `:call denops#notify("${denops.name}", "tailContainerLogs", [])<CR>`,
+          default: "t",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-remove)",
+          rhs:
+            `:call denops#notify("${denops.name}", "removeContainer", [])<CR>`,
+          default: "<C-d>",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-inspect)",
+          rhs:
+            `:call denops#notify("${denops.name}", "inspectContainer", [])<CR>`,
+          default: "<CR>",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-restart)",
+          rhs:
+            `:call denops#notify("${denops.name}", "restartContainer", [])<CR>`,
+          default: "r",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-copy-to)",
+          rhs:
+            `:call denops#notify("${denops.name}", "copyFileToContainer", [])<CR>`,
+          default: "ct",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-copy-from)",
+          rhs:
+            `:call denops#notify("${denops.name}", "copyFileFromContainer", [])<CR>`,
+          default: "cf",
+        },
+      ];
+
+      for (const m of keymaps) {
+        mapping.map(denops, m.lhs, m.rhs, {
+          mode: m.mode as mapType.Mode[],
+          buffer: true,
+          silent: true,
+          noremap: true,
+        });
+
+        // defualt mapping
+        mapping.map(denops, m.default, m.lhs, {
+          mode: "n",
+          buffer: true,
+          silent: true,
+        });
+      }
     },
 
     async copyFileToContainer(): Promise<void> {
       const from = await denops.call("input", "from: ", "", "file") as string;
       const to = await denops.call("input", "to: ") as string;
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       await action.copyFileToContainer(name, from, to);
       console.log(`success to copy ${from} to ${name}:${to}`);
     },
@@ -373,114 +320,105 @@ export async function main(denops: Denops): Promise<void> {
     async copyFileFromContainer(): Promise<void> {
       const from = await denops.call("input", "from: ") as string;
       const to = await denops.call("input", "to: ", "", "file") as string;
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       await action.copyFileFromContainer(name, from, to);
       console.log(`success to copy ${name}:${from} to ${to}`);
     },
 
-    beforeContainersBufferDelete() {
-      containerBuffer = { bufnr: -1 } as Buffer;
-      return Promise.resolve();
-    },
-
-    beforeImagesBufferDelete() {
-      imageBuffer = { bufnr: -1 } as Buffer;
-      return Promise.resolve();
-    },
-
     async pullImage() {
-      const name = await getID(bm, imageBuffer.bufnr);
-      await action.pullImage(denops, name);
+      const image = await getSearchImage(denops);
+      await action.pullImage(denops, image.name);
     },
 
     async attachContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       await action.attachContainer(denops, name);
     },
 
     async execContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
-      const input = await denops.eval(`input("command: ")`) as string;
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
+      const input = await denops.call("input", "command: ") as string;
       if (input) {
         const parts = input.split(" ");
         const cmd = parts.shift() as string;
         const args = parts;
         await action.execContainer(denops, name, cmd, args);
-      } else {
-        console.log("canceled");
       }
     },
 
     async startContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       console.log(`starting ${name}`);
       if (await action.startContainer(httpClient, name)) {
         console.log(`started ${name}`);
-        const containers = await action.getContainers(httpClient);
-        await bm.setbufline(containerBuffer.bufnr, 1, containers);
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
     async stopContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       console.log(`stopping ${name}`);
       if (await action.stopContainer(httpClient, name)) {
         console.log(`stoped ${name}`);
-        const containers = await action.getContainers(httpClient);
-        await bm.setbufline(containerBuffer.bufnr, 1, containers);
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
     async restartContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       console.log(`restarting ${name}`);
       if (await action.restartContainer(httpClient, name)) {
         console.log(`restarted ${name}`);
-        const containers = await action.getContainers(httpClient);
-        await bm.setbufline(containerBuffer.bufnr, 1, containers);
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
     async killContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       console.log(`killing ${name}`);
       if (await docker.killContainer(httpClient, name)) {
         console.log(`killed ${name}`);
-        const containers = await action.getContainers(httpClient);
-        await bm.setbufline(containerBuffer.bufnr, 1, containers);
+        await action.updateContainersBuffer(denops, httpClient);
       }
     },
 
-    async tailContainerLogs(arg: unknown) {
-      const name = (arg as string) || await getName(bm, containerBuffer.bufnr);
+    async tailContainerLogs() {
+      const name = (await getContainer(denops)).Names[0];
       await docker.tailContainerLogs(denops, name);
     },
 
     async inspectImage() {
-      const id = await getID(bm, imageBuffer.bufnr);
-      await inspect(denops, bm, id);
+      const name = await getImageName(denops);
+      await action.inspect(denops, name);
     },
 
     async inspectContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
-      await inspect(denops, bm, name);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
+      await action.inspect(denops, name);
     },
 
     async quickrunImage() {
-      const name = await getRepoTag(bm, imageBuffer.bufnr);
+      const name = await getImageName(denops);
       await action.quickrunImage(denops, name);
     },
 
     async removeImage() {
-      const name = await getRepoTag(bm, imageBuffer.bufnr);
+      const name = await getImageName(denops);
       const input = await denops.eval(
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
       if (input && input === "y" || input === "Y") {
         if (await action.removeImage(httpClient, name)) {
           console.log(`removed ${name}`);
-          const images = await action.getImages(httpClient);
-          await bm.setbufline(imageBuffer.bufnr, 1, images);
+          await action.updateImagesBuffer(denops, httpClient);
         }
       } else {
         console.log("canceled");
@@ -488,15 +426,15 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async removeContainer() {
-      const name = await getName(bm, containerBuffer.bufnr);
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
       const input = await denops.eval(
         `input("Do you want to remove ${name}?(y/n): ")`,
       ) as string;
       if (input && input === "y" || input === "Y") {
         if (await action.removeContainer(httpClient, name)) {
           console.log(`removed ${name}`);
-          const containers = await action.getContainers(httpClient);
-          await bm.setbufline(containerBuffer.bufnr, 1, containers);
+          await action.updateContainersBuffer(denops, httpClient);
         }
       } else {
         console.log("canceled");
