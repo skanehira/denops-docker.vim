@@ -1,7 +1,7 @@
 import { writeConn } from "./testutil.ts";
-import { HttpClient } from "./http.ts";
+import * as http from "./http.ts";
 import { assertEquals } from "./deps.ts";
-import { connect } from "./socket.ts";
+import * as socket from "./socket.ts";
 
 Deno.test("http get 200", async () => {
   const filePath = await Deno.makeTempFile();
@@ -16,20 +16,20 @@ Deno.test("http get 200", async () => {
     },
   );
 
-  const conn = await connect({ path: filePath, transport: "unix" });
-  const client = new HttpClient(conn);
-  const resp = await client.get("/test", {
+  socket.transport.kind = "unix";
+  socket.transport.unixOpt.path = filePath;
+
+  const resp = await http.get("/test", {
     header: { k: "v" },
     params: { p: "v" },
   });
   listener.close();
-  conn.close();
 
   assertEquals(resp.body, 55);
 });
 
 Deno.test("http get with options", () => {
-  const reqStr = HttpClient.newRequest({
+  const reqStr = http.newRequest({
     url: "test",
     method: "GET",
     header: {
@@ -54,7 +54,7 @@ Deno.test("http get with options", () => {
 });
 
 Deno.test("http get without options", () => {
-  const reqStr = HttpClient.newRequest({
+  const reqStr = http.newRequest({
     url: "test",
     method: "GET",
   });

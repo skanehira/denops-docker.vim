@@ -1,5 +1,4 @@
 import { Denops } from "./deps.ts";
-import { HttpClient } from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
@@ -13,14 +12,14 @@ export async function runDockerCLI(denops: Denops, args: unknown[]) {
   await runTerminal(denops, cmd);
 }
 
-export async function getImages(httpClient: HttpClient): Promise<string[]> {
-  const images = await docker.images(httpClient);
+export async function getImages(): Promise<string[]> {
+  const images = await docker.images();
   const table = makeTableString(images);
   return table;
 }
 
-export async function getContainers(httpClient: HttpClient): Promise<string[]> {
-  const containers = await docker.containers(httpClient);
+export async function getContainers(): Promise<string[]> {
+  const containers = await docker.containers();
   const table = makeTableString(containers);
   return table;
 }
@@ -34,10 +33,9 @@ export async function attachContainer(denops: Denops, name: string) {
 }
 
 export async function restartContainer(
-  httpClient: HttpClient,
   name: string,
 ): Promise<boolean> {
-  const resp = await docker.restartContainer(httpClient, name);
+  const resp = await docker.restartContainer(name);
   return resp.status < 300;
 }
 
@@ -58,32 +56,29 @@ export async function tailContainerLogs(
 }
 
 export async function startContainer(
-  httpClient: HttpClient,
   name: string,
 ): Promise<boolean> {
-  const resp = await docker.startContainer(httpClient, name);
+  const resp = await docker.startContainer(name);
   return resp.status < 300;
 }
 
 export async function stopContainer(
-  httpClient: HttpClient,
   name: string,
 ): Promise<boolean> {
-  const resp = await docker.stopContainer(httpClient, name);
+  const resp = await docker.stopContainer(name);
   return resp.status < 300;
 }
 
-export async function killContainer(httpClient: HttpClient, name: string) {
-  const resp = await docker.killContainer(httpClient, name);
+export async function killContainer(name: string) {
+  const resp = await docker.killContainer(name);
   return resp.status < 300;
 }
 
 export async function searchImage(
-  httpClient: HttpClient,
   name: string,
 ): Promise<string[]> {
   console.log(`search "${name}" start`);
-  const images = await docker.searchImage(httpClient, name);
+  const images = await docker.searchImage(name);
   const table = makeTableString(images);
   return table;
 }
@@ -92,13 +87,13 @@ export async function quickrunImage(denops: Denops, name: string) {
   await docker.quickrunImage(denops, name);
 }
 
-export async function removeImage(httpClient: HttpClient, name: string) {
-  const resp = await docker.removeImage(httpClient, name);
+export async function removeImage(name: string) {
+  const resp = await docker.removeImage(name);
   return resp.status <= 300;
 }
 
-export async function removeContainer(httpClient: HttpClient, name: string) {
-  const resp = await docker.removeContainer(httpClient, name);
+export async function removeContainer(name: string) {
+  const resp = await docker.removeContainer(name);
   return resp.status <= 300;
 }
 
@@ -131,11 +126,10 @@ export async function inspect(denops: Denops, id: string) {
 
 export async function updateContainersBuffer(
   denops: Denops,
-  httpClient: HttpClient,
 ) {
   const pos = await denops.call("getcurpos");
   await denops.cmd("setlocal modifiable | silent %d_");
-  const containers = await docker.containers(httpClient);
+  const containers = await docker.containers();
   await vars.b.set(denops, "docker_containers", containers);
   await denops.batch(["setline", 1, makeTableString(containers)], [
     "setpos",
@@ -146,11 +140,10 @@ export async function updateContainersBuffer(
 
 export async function updateImagesBuffer(
   denops: Denops,
-  httpClient: HttpClient,
 ) {
   const pos = await denops.call("getcurpos");
   await denops.cmd("setlocal modifiable | silent %d_");
-  const images = await docker.images(httpClient);
+  const images = await docker.images();
   await vars.b.set(denops, "docker_images", images);
   await denops.batch(["setline", 1, makeTableString(images)], [
     "setpos",
