@@ -186,14 +186,14 @@ docker#command({command})			*docker#command()*
   Execute custom {command}.
   {command} can use parameter like `{0}` to get some data
   that displayed in buffer. For example,
-  if below line is displayed in buffer, `{0}` would get `70586698897d`,
-  `{1}` would get `sad_jemison`.
+  if below line is displayed in buffer, `{0}` would be `70586698897d`,
+  `{1}` would be `sad_jemison`.
 >
   70586698897d sad_jemison  golang:1.14.4...
 <
   Also, you can use |autocmd| to define key map.
   For example, the bellow setting is define key map to |docker-container|,
-  then press `T` to execute `docker top {container}`
+  then press `T`, it execute `docker top {container}` instead.
   >
   augroup docker-custom-command
     au!
