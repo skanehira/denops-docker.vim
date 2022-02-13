@@ -1,5 +1,5 @@
 import { Denops } from "./deps.ts";
-import { HttpClient, Response } from "./http.ts";
+import * as http from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
   Container,
@@ -11,8 +11,8 @@ import {
 
 const dec = new TextDecoder();
 
-export async function images(cli: HttpClient): Promise<Image[]> {
-  const resp = await cli.get<Image[]>("/images/json");
+export async function images(): Promise<Image[]> {
+  const resp = await http.get<Image[]>("/images/json");
   const images: Image[] = [];
   // NOTE: to be able remove image when same id
   for (const image of resp.body) {
@@ -39,11 +39,10 @@ export async function inspect(
 }
 
 export async function removeImage(
-  cli: HttpClient,
   name: string,
   opts: removeImageOpts = { force: false, noprune: false },
-): Promise<Response> {
-  const resp = await cli.delete(`/images/${name}`, {
+): Promise<http.Response> {
+  const resp = await http.del(`/images/${name}`, {
     params: {
       force: opts.force,
       noprune: opts.noprune,
@@ -53,11 +52,10 @@ export async function removeImage(
 }
 
 export async function removeContainer(
-  cli: HttpClient,
   name: string,
   opts: removeContainerOpts = { v: false, force: false, link: false },
-): Promise<Response> {
-  const resp = await cli.delete(`/containers/${name}`, {
+): Promise<http.Response> {
+  const resp = await http.del(`/containers/${name}`, {
     params: {
       v: opts.v,
       force: opts.force,
@@ -67,8 +65,8 @@ export async function removeContainer(
   return resp;
 }
 
-export async function containers(cli: HttpClient): Promise<Container[]> {
-  const resp = await cli.get<Container[]>("/containers/json?all=true");
+export async function containers(): Promise<Container[]> {
+  const resp = await http.get<Container[]>("/containers/json?all=true");
   return resp.body;
 }
 
@@ -79,10 +77,9 @@ export async function pullImage(denops: Denops, name: string) {
 }
 
 export async function searchImage(
-  cli: HttpClient,
   name: string,
 ): Promise<SearchImage[]> {
-  const resp = await cli.get<SearchImage[]>("/images/search", {
+  const resp = await http.get<SearchImage[]>("/images/search", {
     params: {
       term: name,
       limit: 100,
@@ -150,24 +147,21 @@ export async function tailContainerLogs(denops: Denops, name: string) {
 }
 
 export async function startContainer(
-  cli: HttpClient,
   name: string,
-): Promise<Response> {
-  return await cli.post(`/containers/${name}/start`);
+): Promise<http.Response> {
+  return await http.post(`/containers/${name}/start`);
 }
 
 export async function stopContainer(
-  cli: HttpClient,
   name: string,
-): Promise<Response> {
-  return await cli.post(`/containers/${name}/stop`);
+): Promise<http.Response> {
+  return await http.post(`/containers/${name}/stop`);
 }
 
 export async function killContainer(
-  cli: HttpClient,
   name: string,
-): Promise<Response> {
-  return await cli.post(`/containers/${name}/kill`);
+): Promise<http.Response> {
+  return await http.post(`/containers/${name}/kill`);
 }
 
 export async function inspectContainer(
@@ -180,10 +174,9 @@ export async function inspectContainer(
 }
 
 export async function restartContainer(
-  cli: HttpClient,
   name: string,
-): Promise<Response> {
-  return await cli.post(`/containers/${name}/restart`);
+): Promise<http.Response> {
+  return await http.post(`/containers/${name}/restart`);
 }
 
 export async function copyFileToContainer(

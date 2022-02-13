@@ -43,115 +43,103 @@ function isObject(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === "object";
 }
 
-export class HttpClient {
-  #socket: Deno.Conn;
-  private static instance?: HttpClient;
+export async function request<T>(req: Request): Promise<Response<T>> {
+  const reqStr = newRequest(req);
+  const socket = await connect();
 
-  constructor(conn: Deno.Conn) {
-    this.#socket = conn;
+  await socket.write(new TextEncoder().encode(reqStr));
+  const incomResp = await readResponse(socket);
+
+  const resp = {
+    status: incomResp.status,
+    header: incomResp.headers,
+  } as Response<T>;
+
+  if (incomResp.status == 200) {
+    resp.body = await incomResp.json();
+  } else if (
+    incomResp.status == 304 ||
+    incomResp.status == 204
+  ) {
+    // do nothing
+  } else {
+    const body = await incomResp.json();
+    throw body.message;
+  }
+  socket.close();
+  return resp;
+}
+
+export async function post(
+  endpoint: string,
+  opts?: Options,
+): Promise<Response> {
+  const resp = await request(
+    <Request> {
+      url: endpoint,
+      method: "POST",
+      header: opts?.header,
+      params: opts?.params,
+    },
+  );
+  return resp;
+}
+
+export async function del(endpoint: string, opts?: Options): Promise<Response> {
+  const resp = await request(
+    <Request> {
+      url: endpoint,
+      method: "DELETE",
+      header: opts?.header,
+      params: opts?.params,
+    },
+  );
+  return resp;
+}
+
+export async function get<T>(
+  endpoint: string,
+  opts?: Options,
+): Promise<Response<T>> {
+  const resp = await request<T>(
+    <Request> {
+      url: endpoint,
+      header: opts?.header,
+      params: opts?.params,
+    },
+  );
+  return resp;
+}
+
+export function newRequest(req: Request): string {
+  req.method = req.method ?? "GET";
+
+  let header = `${req.method} ${req.url}`;
+  if (req.params && Object.keys(req.params).length) {
+    const params = new URLSearchParams(req.params);
+    header += `?${params.toString()}`;
+  }
+  header += ` HTTP/1.1\r\nHost: localhost\r\n`;
+
+  for (
+    const [k, v] of Object.entries(req.header ?? [])
+  ) {
+    header += `${k}: ${v}\r\n`;
   }
 
-  static async get(): Promise<HttpClient> {
-    if (!HttpClient.instance) {
-      HttpClient.instance = new HttpClient(await connect());
-    }
-    return HttpClient.instance;
-  }
-
-  async post(endpoint: string, opts?: Options): Promise<Response> {
-    const resp = await this.request(
-      <Request> {
-        url: endpoint,
-        method: "POST",
-        header: opts?.header,
-        params: opts?.params,
-      },
-    );
-    return resp;
-  }
-
-  async delete(endpoint: string, opts?: Options): Promise<Response> {
-    const resp = await this.request(
-      <Request> {
-        url: endpoint,
-        method: "DELETE",
-        header: opts?.header,
-        params: opts?.params,
-      },
-    );
-
-    return resp;
-  }
-
-  async get<T>(
-    endpoint: string,
-    opts?: Options,
-  ): Promise<Response<T>> {
-    const resp = await this.request<T>(
-      <Request> {
-        url: endpoint,
-        header: opts?.header,
-        params: opts?.params,
-      },
-    );
-    return resp;
-  }
-
-  static newRequest(req: Request): string {
-    req.method = req.method ?? "GET";
-
-    let header = `${req.method} ${req.url}`;
-    if (req.params && Object.keys(req.params).length) {
-      const params = new URLSearchParams(req.params);
-      header += `?${params.toString()}`;
-    }
-    header += ` HTTP/1.1\r\nHost: localhost\r\n`;
-
-    for (
-      const [k, v] of Object.entries(req.header ?? [])
-    ) {
-      header += `${k}: ${v}\r\n`;
-    }
-
-    let reqStr = `${header}\r\n`;
-    if ("data" in req) {
-      let data = req.data;
-      if (isObject(data)) {
-        if (Object.entries(data).length) {
-          data = JSON.stringify(data);
-        } else {
-          data = "";
-        }
+  let reqStr = `${header}\r\n`;
+  if ("data" in req) {
+    let data = req.data;
+    if (isObject(data)) {
+      if (Object.entries(data).length) {
+        data = JSON.stringify(data);
+      } else {
+        data = "";
       }
-      reqStr = `${header}\r\n${data}\r\n`;
     }
-    return reqStr;
+    reqStr = `${header}\r\n${data}\r\n`;
   }
-
-  private async request<T>(req: Request): Promise<Response<T>> {
-    const reqStr = HttpClient.newRequest(req);
-
-    await this.#socket.write(new TextEncoder().encode(reqStr));
-    const incomResp = await readResponse(this.#socket);
-
-    const resp = {
-      status: incomResp.status,
-      header: incomResp.headers,
-    } as Response<T>;
-
-    if (incomResp.status == 200) {
-      resp.body = await incomResp.json();
-    } else if (
-      incomResp.status == 304 ||
-      incomResp.status == 204
-    ) {
-      // do nothing
-    } else {
-      const body = await incomResp.json();
-      throw body.message;
-    }
-    return resp;
-  }
+  return reqStr;
 }
 
 /**
