@@ -1,7 +1,7 @@
 import { Denops } from "./deps.ts";
 
 export async function runTerminal(denops: Denops, cmd: string[]) {
-  if (await denops.call("has", "nvim")) {
+  if (denops.meta.host === "nvim") {
     await denops.cmd("new");
     await denops.call("termopen", cmd);
   } else {
