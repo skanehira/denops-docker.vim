@@ -14,13 +14,13 @@ export async function runDockerCLI(denops: Denops, args: unknown[]) {
 
 export async function getImages(): Promise<string[]> {
   const images = await docker.images();
-  const table = makeTableString(images);
+  const table = makeTableString(images, "images");
   return table;
 }
 
 export async function getContainers(): Promise<string[]> {
   const containers = await docker.containers();
-  const table = makeTableString(containers);
+  const table = makeTableString(containers, "containers");
   return table;
 }
 
@@ -79,7 +79,7 @@ export async function searchImage(
 ): Promise<string[]> {
   console.log(`search "${name}" start`);
   const images = await docker.searchImage(name);
-  const table = makeTableString(images);
+  const table = makeTableString(images, "searchImages");
   return table;
 }
 
@@ -131,11 +131,14 @@ export async function updateContainersBuffer(
   await denops.cmd("setlocal modifiable | silent %d_");
   const containers = await docker.containers();
   await vars.b.set(denops, "docker_containers", containers);
-  await denops.batch(["setline", 1, makeTableString(containers)], [
-    "setpos",
-    ".",
-    pos,
-  ]);
+  await denops.batch(
+    ["setline", 1, makeTableString(containers, "containers")],
+    [
+      "setpos",
+      ".",
+      pos,
+    ],
+  );
 }
 
 export async function updateImagesBuffer(
@@ -145,7 +148,7 @@ export async function updateImagesBuffer(
   await denops.cmd("setlocal modifiable | silent %d_");
   const images = await docker.images();
   await vars.b.set(denops, "docker_images", images);
-  await denops.batch(["setline", 1, makeTableString(images)], [
+  await denops.batch(["setline", 1, makeTableString(images, "images")], [
     "setpos",
     ".",
     pos,

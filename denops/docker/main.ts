@@ -91,7 +91,11 @@ export async function main(denops: Denops): Promise<void> {
       if (term) {
         const images = await docker.searchImage(term);
         await vars.b.set(denops, "docker_images", images);
-        await denops.call("setline", 1, makeTableString(images));
+        await denops.call(
+          "setline",
+          1,
+          makeTableString(images, "searchImages"),
+        );
         await denops.cmd("setlocal modifiable");
         const ft = "docker-hub";
         await denops.cmd(

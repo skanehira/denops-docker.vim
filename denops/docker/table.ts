@@ -4,30 +4,22 @@ import { formatBytes } from "./util.ts";
 
 const dateFormat = "YYYY/MM/dd HH:mm:ss";
 
-function isImage(data: unknown): data is Image[] {
-  const images = data as Image[];
-  return images[0].RepoTags !== undefined;
-}
+export type TableKind = "images" | "containers" | "searchImages";
 
-function isContainer(data: unknown): data is Container[] {
-  const cons = data as Container[];
-  return cons[0].State !== undefined;
-}
-
-function isSearchImage(data: unknown): data is SearchImage[] {
-  const images = data as SearchImage[];
-  return images[0].star_count != undefined;
-}
-
-export function makeTableString(data: unknown): string[] {
-  if (isImage(data)) {
-    return makeImageTable(data);
-  } else if (isContainer(data)) {
-    return makeContainerTable(data);
-  } else if (isSearchImage(data)) {
-    return makeSearchImage(data);
+export function makeTableString(
+  data: unknown,
+  kind: TableKind,
+): string[] {
+  switch (kind) {
+    case "images":
+      return makeImageTable(data as Image[]);
+    case "containers":
+      return makeContainerTable(data as Container[]);
+    case "searchImages":
+      return makeSearchImage(data as SearchImage[]);
+    default:
+      return [];
   }
-  return [];
 }
 
 function makeSearchImage(images: SearchImage[]): string[] {

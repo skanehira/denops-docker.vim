@@ -1,32 +1,32 @@
-import { makeTableString } from "./table.ts";
+import { makeTableString, TableKind } from "./table.ts";
 import { Image } from "./types.ts";
 import { assertEquals } from "./deps.ts";
 import { readFile, readJSON } from "./testutil.ts";
 
 const tests = [
   {
-    name: "images",
+    kind: "images",
     dataFile: "denops/docker/testdata/table/images.json",
     wantFile: "denops/docker/testdata/table/images.out",
   },
   {
-    name: "containers table",
+    kind: "containers",
     dataFile: "denops/docker/testdata/table/containers.json",
     wantFile: "denops/docker/testdata/table/containers.out",
   },
   {
-    name: "search images",
+    kind: "searchImages",
     dataFile: "denops/docker/testdata/table/searchImages.json",
     wantFile: "denops/docker/testdata/table/searchImages.out",
   },
 ];
 
 tests.forEach((test) => {
-  Deno.test(test.name, async () => {
+  Deno.test(test.kind, async () => {
     const images = await readJSON<Image[]>(
       test.dataFile,
     );
-    const table = makeTableString(images);
+    const table = makeTableString(images, test.kind as TableKind);
     const got = table;
 
     const want = await readFile(test.wantFile);
