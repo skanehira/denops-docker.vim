@@ -30,12 +30,18 @@ export async function images(): Promise<Image[]> {
 }
 
 export async function inspect(
-  denops: Denops,
   id: string,
 ): Promise<string[]> {
-  const cmd = `docker inspect ${id}`;
-  const result = await denops.call("systemlist", cmd) as string[];
-  return result;
+  const p = Deno.run({
+    cmd: ["docker", "inspect", id],
+    stdout: "piped",
+    stderr: "piped",
+  });
+
+  const output = await p.output();
+  p.close();
+  const result = dec.decode(output);
+  return result.split("\n");
 }
 
 export async function removeImage(
@@ -162,15 +168,6 @@ export async function killContainer(
   name: string,
 ): Promise<http.Response> {
   return await http.post(`/containers/${name}/kill`);
-}
-
-export async function inspectContainer(
-  denops: Denops,
-  name: string,
-): Promise<string[]> {
-  const cmd = `docker inspect ${name}`;
-  const result = await denops.call("systemlist", cmd) as string[];
-  return result;
 }
 
 export async function restartContainer(
