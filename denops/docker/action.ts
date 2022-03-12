@@ -117,7 +117,7 @@ export async function inspect(denops: Denops, id: string) {
   await denops.cmd(
     `drop docker://inspect/${id}`,
   );
-  const result = await docker.inspect(denops, id);
+  const result = await docker.inspect(id);
   await denops.call("setline", 1, result);
   await denops.cmd(
     "setlocal ft=json buftype=nofile bufhidden=wipe nolist nomodifiable nomodified",
