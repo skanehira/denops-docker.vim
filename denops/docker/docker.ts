@@ -3,6 +3,7 @@ import * as http from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
   Container,
+  ContainerListParams,
   Image,
   removeContainerOpts,
   removeImageOpts,
@@ -71,8 +72,18 @@ export async function removeContainer(
   return resp;
 }
 
-export async function containers(): Promise<Container[]> {
-  const resp = await http.get<Container[]>("/containers/json?all=true");
+export async function containers(
+  filters?: ContainerListParams,
+): Promise<Container[]> {
+  const params = Object.entries(filters ?? { all: true }).map((o) => {
+    const [k, v] = o;
+    if (k === "filters") {
+      return `${k}=${JSON.stringify(v)}`;
+    }
+    return `${k}=${v}`;
+  }).join("&");
+  const url = `/containers/json?${params}`;
+  const resp = await http.get<Container[]>(url);
   return resp.body;
 }
 

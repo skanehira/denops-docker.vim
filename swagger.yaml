@@ -5271,12 +5271,13 @@ paths:
                 ImageID: "d74508fb6632491cea586a1fd7d748dfc5274cd6fdfedee309ecdcbc2bf5cb82"
                 Command: "echo 1"
                 Created: 1367854155
-                State: "Exited"
-                Status: "Exit 0"
+                State: "running"
+                Status: "Up 3 seconds"
                 Ports:
                   - PrivatePort: 2222
                     PublicPort: 3333
                     Type: "tcp"
+                    IP: "0.0.0.0"
                 Labels:
                   com.example.vendor: "Acme"
                   com.example.license: "GPL"

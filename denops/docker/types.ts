@@ -30,6 +30,30 @@ export interface Container {
   Mounts: Mount[];
 }
 
+// See https://docs.docker.com/engine/api/v1.41/#operation/ContainerList
+type ContainerStatus =
+  | "created"
+  | "restarting"
+  | "running"
+  | "removing"
+  | "paused"
+  | "exited"
+  | "dead";
+
+// TODO: add more fields
+export interface ContainerListFilters {
+  id?: string[];
+  exited?: number[];
+  status?: ContainerStatus[];
+}
+
+export interface ContainerListParams {
+  all?: boolean;
+  limit?: number;
+  size?: boolean;
+  filters?: ContainerListFilters;
+}
+
 export interface Port {
   IP?: string;
   PublicPort?: number;

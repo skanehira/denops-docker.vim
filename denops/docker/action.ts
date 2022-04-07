@@ -69,8 +69,25 @@ export async function stopContainer(
   return resp.status < 300;
 }
 
-export async function killContainer(name: string) {
-  const resp = await docker.killContainer(name);
+export async function killContainer(id: string) {
+  const containers = await docker.containers({
+    all: true,
+    filters: {
+      id: [id],
+    },
+  });
+
+  if (containers.length === 0) {
+    console.error(`not found container: ${id}`);
+    return false;
+  }
+
+  if (containers[0].State !== "running") {
+    console.warn(`${id} is not running`);
+    return false;
+  }
+
+  const resp = await docker.killContainer(id);
   return resp.status < 300;
 }
 
