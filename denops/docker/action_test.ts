@@ -20,11 +20,11 @@ Deno.test("get images", async () => {
 Deno.test("get containers", async () => {
   const got = await action.getContainers();
   const want = [
-    "ID           NAME           IMAGE         STATUS CREATED             PORTS                   ",
-    "8dfafdbc3a40 boring_feynman ubuntu:latest Exit 0 2013/05/07 00:29:15 undefined:3333->2222/tcp",
-    "9cd87474be90 coolName       ubuntu:latest Exit 0 2013/05/07 00:29:15                         ",
-    "3176a2479c92 sleepy_dog     ubuntu:latest Exit 0 2013/05/07 00:29:14                         ",
-    "4cb07b47f9fb running_cat    ubuntu:latest Exit 0 2013/05/07 00:29:12                         ",
+    "ID           NAME           IMAGE         STATUS       CREATED             PORTS                 ",
+    "8dfafdbc3a40 boring_feynman ubuntu:latest Up 3 seconds 2013/05/07 00:29:15 0.0.0.0:3333->2222/tcp",
+    "9cd87474be90 coolName       ubuntu:latest Exit 0       2013/05/07 00:29:15                       ",
+    "3176a2479c92 sleepy_dog     ubuntu:latest Exit 0       2013/05/07 00:29:14                       ",
+    "4cb07b47f9fb running_cat    ubuntu:latest Exit 0       2013/05/07 00:29:12                       ",
   ];
 
   assertEquals(got, want);
@@ -66,6 +66,12 @@ Deno.test("stop container", async () => {
 });
 
 Deno.test("kill container", async () => {
+  const got = await action.killContainer("boring_feynman");
+  const want = true;
+  assertEquals(got, want);
+});
+
+Deno.test("kill not existed container", async () => {
   const got = await action.killContainer("test");
   const want = true;
   assertEquals(got, want);

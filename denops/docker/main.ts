@@ -384,7 +384,7 @@ export async function main(denops: Denops): Promise<void> {
       const container = await getContainer(denops);
       const name = container.Names[0].substring(1);
       console.log(`killing ${name}`);
-      if (await docker.killContainer(name)) {
+      if (await action.killContainer(container.Id)) {
         console.log(`killed ${name}`);
         await action.updateContainersBuffer(denops);
       }
