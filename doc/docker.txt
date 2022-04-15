@@ -102,7 +102,7 @@ KEY-MAPPINGS					*docker-key-mappings*
 <Plug>(docker-image-quickrun)			*<Plug>(docker-image-quickrun)*
   Quick run container with specified image.
   This action is like bellow. >
-    docker run --rm -it --detach-keys=ctrl-\\ {image} --entrypoint \
+    docker run --rm -it --detach-keys=ctrl-_ {image} --entrypoint \
       sh -c "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh"
 >
 <<Plug>(docker-image-remove)			*<Plug>(docker-image-remove)*
@@ -127,14 +127,14 @@ KEY-MAPPINGS					*docker-key-mappings*
   Attach specified container.
   This actions is like bellow.
 >
-  docker exec -it --detach-keys=ctrl-\\ {container} sh -c \
+  docker exec -it --detach-keys=ctrl-_ {container} sh -c \
     "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh"
 <
 <Plug>(docker-container-exec)			*<Plug>(docker-container-exec)*
   Execute some command.
   This action is like bellow.
 >
-  docker exec -it --detach-keys=ctrl-\\ {container} {command}
+  docker exec -it --detach-keys=ctrl-_ {container} {command}
 <
 <Plug>(docker-container-log)			*<Plug>(docker-container-log)*
   Tail specified container log.

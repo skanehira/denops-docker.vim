@@ -6,6 +6,5 @@ export async function runTerminal(denops: Denops, cmd: string[]) {
     await denops.call("termopen", cmd);
   } else {
     await denops.cmd(`terminal ++shell ${cmd.join(" ")}`);
-    await denops.cmd("nnoremap <buffer> <silent> <CR> :bw<CR>");
   }
 }
