@@ -17,12 +17,9 @@ export const defaultOptions = ():
   return transport.kind === "unix" ? transport.unixOpt : transport.tcpOpt;
 };
 
-export async function connect(
-  options?: Deno.UnixConnectOptions | Deno.ConnectOptions,
-): Promise<Deno.Conn> {
-  const conn = await Deno.connect(
-    options ??
-      defaultOptions(),
-  );
+export async function connect(): Promise<Deno.Conn> {
+  const conn = transport.kind === "unix"
+    ? await Deno.connect(transport.unixOpt)
+    : await Deno.connect(transport.tcpOpt);
   return conn;
 }
