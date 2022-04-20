@@ -122,15 +122,16 @@ export async function quickrunImage(denops: Denops, name: string) {
 }
 
 export async function attachContainer(denops: Denops, name: string) {
+  const shell = "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh";
   const cmd = <string[]> [
     "docker",
     "exec",
     "-it",
-    "--detach-keys=ctrl-\\",
+    "--detach-keys=ctrl-_",
     name,
     "sh",
     "-c",
-    "[ -e /bin/bash ] || [ -e /usr/local/bin/bash ] && bash || sh",
+    denops.meta.host === "vim" ? `'${shell}'` : `${shell}`,
   ];
   await runTerminal(denops, cmd);
 }
