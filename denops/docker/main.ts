@@ -18,6 +18,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! DockerSearchImage :e docker://hub`,
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttachContainer :call docker#attachContainer(<f-args>)`,
+    `command! -nargs=1 -complete=customlist,docker#listContainer DockerExecContainer :call docker#execContainer(<f-args>)`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerShowContainerLog :call docker#showContainerLog(<f-args>)`,
   ];
 
@@ -58,6 +59,11 @@ export async function main(denops: Denops): Promise<void> {
     async containerAttach(arg: unknown) {
       const name = arg as string;
       await action.attachContainer(denops, name);
+    },
+
+    async containerExec(arg: unknown) {
+      const name = arg as string;
+      await action.execContainer(denops, name);
     },
 
     async customCommand(command: unknown) {
@@ -341,13 +347,7 @@ export async function main(denops: Denops): Promise<void> {
     async execContainer() {
       const container = await getContainer(denops);
       const name = container.Names[0].substring(1);
-      const input = await denops.call("input", "command: ") as string;
-      if (input) {
-        const parts = input.split(" ");
-        const cmd = parts.shift() as string;
-        const args = parts;
-        await action.execContainer(denops, name, cmd, args);
-      }
+      await action.execContainer(denops, name);
     },
 
     async startContainer() {

@@ -76,6 +76,9 @@ COMMANDS					*docker-commands*
 :DockerAttachContainer				*:DockerAttachContainer*
   Attach specific container
 
+:DockerExecContainer				*:DockerExecContainer*
+  Execute specified command at container
+
 :DockerShowContainerLog				*:DockerShowContainerLog*
   Show specific container log
 
