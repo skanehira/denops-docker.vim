@@ -88,9 +88,13 @@ function doTest() {
 
 function main() {
   case $1 in
-    test)
+    test:run)
       doUp
       doTest $2
+      ;;
+    test:cov)
+      doUp
+      doTest $2 cov
       ;;
     mock:api:up)
       doUp

@@ -38,4 +38,4 @@ jobs:
         with:
           deno-version: ${{ matrix.deno-version }}
       - name: run test
-        run: ./task.sh test
+        run: ./task.sh test:run
