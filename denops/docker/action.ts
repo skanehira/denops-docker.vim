@@ -42,10 +42,14 @@ export async function restartContainer(
 export async function execContainer(
   denops: Denops,
   name: string,
-  command: string,
-  args: string[],
 ) {
-  await docker.execContainer(denops, name, command, args);
+  const input = await denops.call("input", "command: ") as string;
+  if (input) {
+    const parts = input.split(" ");
+    const command = parts.shift() as string;
+    const args = parts;
+    await docker.execContainer(denops, name, command, args);
+  }
 }
 
 export async function tailContainerLogs(
