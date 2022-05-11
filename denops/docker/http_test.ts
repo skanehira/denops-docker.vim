@@ -17,7 +17,7 @@ Deno.test("http get 200", async () => {
   );
 
   socket.transport.kind = "unix";
-  socket.transport.unixOpt.path = filePath;
+  socket.transport.unix.path = filePath;
 
   const resp = await http.get("/test", {
     header: { k: "v" },

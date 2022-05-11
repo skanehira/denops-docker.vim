@@ -1,28 +1,16 @@
 export const transport = {
   kind: "unix",
-  unixOpt: {
-    transport: "unix",
+  unix: {
     path: "/var/run/docker.sock",
-  } as Deno.UnixConnectOptions,
-  tcpOpt: {
-    transport: "tcp",
-    hostname: "localhost",
-    port: 9999,
-  } as Deno.ConnectOptions,
+  },
 };
 
-export const defaultOptions = ():
-  | Deno.UnixConnectOptions
-  | Deno.ConnectOptions => {
-  return transport.kind === "unix" ? transport.unixOpt : transport.tcpOpt;
-};
-
-export async function connect(
-  options?: Deno.UnixConnectOptions | Deno.ConnectOptions,
-): Promise<Deno.Conn> {
-  const conn = await Deno.connect(
-    options ??
-      defaultOptions(),
-  );
-  return conn;
+export async function connect(): Promise<Deno.Conn> {
+  return transport.kind === "unix"
+    ? await Deno.connect({ transport: "unix", path: transport.unix.path })
+    : await Deno.connect({
+      transport: "tcp",
+      hostname: "localhost",
+      port: 9999,
+    });
 }
