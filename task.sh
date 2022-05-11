@@ -86,6 +86,19 @@ function doTest() {
   esac
 }
 
+function usage() {
+  cat << EOF
+Usage:
+  task.sh {action} [{argument}...]
+
+Avaliable action:
+  test:run        run tests
+  test:cov        run tests and output soverage
+  mock:api:up     run docker's mock api container
+  mock:api:down   remove docker's mock api container and network
+EOF
+}
+
 function main() {
   case $1 in
     test:run)
@@ -103,10 +116,9 @@ function main() {
       doDown
       ;;
     *)
-      echo -e "invalid argument"
+      usage
       ;;
   esac
 }
-
 
 main $@
