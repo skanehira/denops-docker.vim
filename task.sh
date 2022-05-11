@@ -72,6 +72,10 @@ function doTest() {
   # TODO enable type check
   # https://github.com/keroxp/servest/issues/170
   deno test -A --unstable --coverage=cov --no-check=remote "https://deno.land/x/servest@v1.3.4/testing.ts" .
+  exit_code=$?
+  if [ ${exit_code} != 0 ]; then
+    exit ${exit_code}
+  fi
   case $1 in
     cov)
       deno coverage cov
