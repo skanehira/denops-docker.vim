@@ -30,10 +30,12 @@ jobs:
         os: [ubuntu-latest]
     name: deno test
     runs-on: ${{ matrix.os }}
+    env:
+      TZ: Asia/Tokyo
     steps:
       - uses: actions/checkout@v2
       - uses: denoland/setup-deno@main
         with:
           deno-version: ${{ matrix.deno-version }}
       - name: run test
-        run: make test
+        run: ./task.sh test
