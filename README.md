@@ -25,6 +25,7 @@ This is the new version of [docker.vim](https://github.com/skanehira/docker.vim)
 - exec container
 - tail container log
 - restart container
+- edit container file
 
 ## Author
 skanehira
