@@ -86,6 +86,10 @@ function doTest() {
   esac
 }
 
+function doUpdateDeps() {
+  udd denops/docker/deps.ts
+}
+
 function usage() {
   cat << EOF
 Usage:
@@ -114,6 +118,9 @@ function main() {
       ;;
     mock:api:down)
       doDown
+      ;;
+    deps:update)
+      doUpdateDeps
       ;;
     *)
       usage
