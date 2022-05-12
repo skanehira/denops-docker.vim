@@ -73,14 +73,24 @@ COMMANDS					*docker-commands*
 :DockerSearchImage				*:DockerSearchImage*
   Open buffer of |docker-hub|
 
-:DockerAttachContainer				*:DockerAttachContainer*
-  Attach specific container
+:DockerAttachContainer {contianer}		*:DockerAttachContainer*
+  Attach specific container.
+  You can autocomplete container name with <tab>.
 
-:DockerExecContainer				*:DockerExecContainer*
-  Execute specified command at container
+:DockerExecContainer {container}		*:DockerExecContainer*
+  Execute specified command at container.
+  You can autocomplete container name with <tab>.
 
-:DockerShowContainerLog				*:DockerShowContainerLog*
-  Show specific container log
+:DockerShowContainerLog {container}		*:DockerShowContainerLog*
+  Show specific container log.
+  You can autocomplete container name with <tab>.
+
+:DockerEditFile {container}			*:DockerEditFile*
+  Edit specific container's file.
+  After specify contianer name, you have to input container's file.
+  You can autocomplete container name and file path with <tab>.
+  After finished editting and type |:w|,
+  container's file will be updated.
 
 ------------------------------------------------------------------------------
 BUFFER							*docker-buffers*
@@ -157,6 +167,8 @@ KEY-MAPPINGS					*docker-key-mappings*
 <Plug>(docker-pull-image)			*<Plug>(docker-pull-image)*
   Pull specified image in |docker-hub|
 
+<Plug>(docker-container-edit-file)		*<Plug>(docker-container-edit-file)*
+  Edit container's file.
 						*docker-default-key-mappings*
 
 default mappings
@@ -179,6 +191,7 @@ default mappings
 			`normal`	r	<Plug>(docker-container-restart)
 			`normal`	ct	<Plug>(docker-container-copy-to)
 			`normal`	cf	<Plug>(docker-container-copy-from)
+			`normal`	e 	<Plug>(docker-container-edit-file)
 |docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
 			`normal`	q	<Plug>(docker-buffer-close)
 

@@ -1,4 +1,4 @@
-import { Denops } from "./deps.ts";
+import { Denops, path } from "./deps.ts";
 import * as http from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
@@ -240,4 +240,70 @@ export async function copyFileFromContainer(
   }
   p.stderr?.close();
   p.close();
+}
+
+export type DirectoryItemType = "dir" | "file";
+
+export interface DirectoryItem {
+  name: string;
+  path: string;
+  type: "dir" | "file";
+}
+
+export async function containerFiles(
+  id: string,
+  path: string,
+): Promise<DirectoryItem[]> {
+  const opt: Deno.RunOptions = {
+    cmd: [
+      "docker",
+      "exec",
+      id,
+      "ls",
+      "-la",
+      path,
+    ],
+    stdin: "null",
+    stdout: "piped",
+    stderr: "null",
+  };
+
+  const p = Deno.run(opt);
+  const status = await p.status();
+  p.close();
+  if (!status.success) {
+    throw new Error(
+      `failed to get directory info from ${id}`,
+    );
+  }
+  const out = dec.decode(await p.output());
+  return parseDirectoryItems(out, path);
+}
+
+export function parseDirectoryItems(
+  input: string,
+  parentPath: string,
+): DirectoryItem[] {
+  if (input === "") return [];
+
+  const items: DirectoryItem[] = [];
+
+  const lines = input.trim().split("\n").splice(1);
+
+  for (const line of lines) {
+    const cols = line.split(" ").filter((value) => value !== "");
+    const ftype = cols.at(0)?.at(0) === "d" ? "dir" : "file";
+    const fname = cols.at(-1) as string;
+    if (ftype === "dir" && fname === "." || fname === "..") {
+      continue;
+    }
+    items.push(
+      {
+        name: fname,
+        path: path.join(parentPath, ftype === "dir" ? fname + "/" : fname),
+        type: ftype,
+      },
+    );
+  }
+  return items;
 }

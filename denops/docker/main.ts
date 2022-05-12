@@ -1,4 +1,4 @@
-import { autocmd, Denops, isString } from "./deps.ts";
+import { autocmd, Denops, fs, isString, path } from "./deps.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
   buildDockerCommand,
@@ -19,6 +19,7 @@ export async function main(denops: Denops): Promise<void> {
     `command! -nargs=+ Docker :call denops#notify("${denops.name}", "runDockerCLI", [<f-args>])`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerAttachContainer :call docker#attachContainer(<f-args>)`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerExecContainer :call docker#execContainer(<f-args>)`,
+    `command! -nargs=1 -complete=customlist,docker#listContainer DockerEditFile :call docker#editContainerFile(<f-args>)`,
     `command! -nargs=1 -complete=customlist,docker#listContainer DockerShowContainerLog :call docker#showContainerLog(<f-args>)`,
   ];
 
@@ -54,6 +55,58 @@ export async function main(denops: Denops): Promise<void> {
       }).map((c) => {
         return c.Names[0].substring(1);
       });
+    },
+
+    async containerFiles(...args: unknown[]) {
+      const [name, fpath] = args as string[];
+      const directories = await docker.containerFiles(
+        name,
+        fpath.at(-1) === "/" ? fpath : path.dirname(fpath),
+      );
+      return directories;
+    },
+
+    async openContainerFile(...arg: unknown[]) {
+      const [id, container_filepath] = arg as string[];
+      if (container_filepath.at(-1) === "/") {
+        console.error(`cannot edit directory: ${container_filepath}`);
+        return;
+      }
+      const tmpdir = await Deno.makeTempDir();
+      const host_filepath = path.join(
+        tmpdir,
+        path.basename(container_filepath),
+      );
+      fs.ensureFile(host_filepath);
+      await action.copyFileFromContainer(id, container_filepath, host_filepath);
+      await denops.cmd(`new ${host_filepath}`);
+
+      await autocmd.group(denops, "denops_docker_edit_file", (helper) => {
+        helper.define(
+          "BufWritePost",
+          "<buffer>",
+          `call denops#notify("${denops.name}", "updateContainerFile", ["${id}", "${host_filepath}", "${container_filepath}"])`,
+        );
+      });
+    },
+
+    async editContainerFile() {
+      const container = await getContainer(denops);
+      const name = container.Names[0].substring(1);
+      await denops.call("docker#editContainerFile", name);
+    },
+
+    async updateContainerFile(
+      id: unknown,
+      host_filepath: unknown,
+      container_filepath: unknown,
+    ) {
+      await action.copyFileToContainer(
+        id as string,
+        host_filepath as string,
+        container_filepath as string,
+      );
+      console.log(`updated ${container_filepath}`);
     },
 
     async containerAttach(arg: unknown) {
@@ -295,6 +348,13 @@ export async function main(denops: Denops): Promise<void> {
           rhs:
             `:call denops#notify("${denops.name}", "copyFileFromContainer", [])<CR>`,
           default: "cf",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-edit-file)",
+          rhs:
+            `:call denops#notify("${denops.name}", "editContainerFile", [])<CR>`,
+          default: "e",
         },
       ];
 
