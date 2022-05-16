@@ -198,6 +198,7 @@ export async function main(denops: Denops): Promise<void> {
             silent: true,
           });
         }
+        await denops.cmd("redraw!");
       } else {
         console.log("canceled");
       }
@@ -258,6 +259,7 @@ export async function main(denops: Denops): Promise<void> {
           silent: true,
         });
       }
+      await denops.cmd("redraw!");
     },
 
     async containers() {
@@ -373,6 +375,8 @@ export async function main(denops: Denops): Promise<void> {
           silent: true,
         });
       }
+
+      await denops.cmd("redraw!");
     },
 
     async copyFileToContainer(): Promise<void> {
