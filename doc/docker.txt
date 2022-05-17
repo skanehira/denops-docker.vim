@@ -191,7 +191,7 @@ default mappings
 			`normal`	r	<Plug>(docker-container-restart)
 			`normal`	ct	<Plug>(docker-container-copy-to)
 			`normal`	cf	<Plug>(docker-container-copy-from)
-			`normal`	e 	<Plug>(docker-container-edit-file)
+			`normal`	E 	<Plug>(docker-container-edit-file)
 |docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
 			`normal`	q	<Plug>(docker-buffer-close)
 

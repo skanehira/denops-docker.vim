@@ -356,7 +356,7 @@ export async function main(denops: Denops): Promise<void> {
           lhs: "<Plug>(docker-container-edit-file)",
           rhs:
             `:call denops#notify("${denops.name}", "editContainerFile", [])<CR>`,
-          default: "e",
+          default: "E",
         },
       ];
 
