@@ -169,6 +169,10 @@ KEY-MAPPINGS					*docker-key-mappings*
 
 <Plug>(docker-container-edit-file)		*<Plug>(docker-container-edit-file)*
   Edit container's file.
+
+<Plug>(docker-open-dockerhub)			*<Plug>(docker-open-dockerhub)*
+  Open image's url in browser.
+
 						*docker-default-key-mappings*
 
 default mappings
@@ -194,6 +198,7 @@ default mappings
 			`normal`	E 	<Plug>(docker-container-edit-file)
 |docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
 			`normal`	q	<Plug>(docker-buffer-close)
+			`normal`	<C-o>	<Plug>(docker-open-dockerhub)
 
 ------------------------------------------------------------------------------
 FUNCTIONS					*docker-functions*

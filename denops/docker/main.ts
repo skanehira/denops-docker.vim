@@ -1,4 +1,14 @@
-import { autocmd, Denops, fs, isString, path } from "./deps.ts";
+import {
+  autocmd,
+  Denops,
+  fs,
+  isString,
+  mapping,
+  mapType,
+  open,
+  path,
+  vars,
+} from "./deps.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
   buildDockerCommand,
@@ -9,7 +19,7 @@ import {
 import * as docker from "./docker.ts";
 import * as action from "./action.ts";
 import { makeTableString } from "./table.ts";
-import { mapping, mapType, vars } from "./deps.ts";
+import { SearchImage } from "./types.ts";
 
 export async function main(denops: Denops): Promise<void> {
   const commands: string[] = [
@@ -205,8 +215,25 @@ export async function main(denops: Denops): Promise<void> {
     },
 
     async openDockerHub(): Promise<void> {
-      console.log("open docker hub");
-      await Promise.resolve();
+      const images = await vars.b.get(
+        denops,
+        "docker_images",
+        {},
+      ) as SearchImage[];
+      if (Object.keys(images).length === 0) {
+        console.error("invalid image");
+        return;
+      }
+      const line = await denops.call("line", ".") as number;
+      const image = images.at(line - 2);
+      if (!image) {
+        console.error("not found image");
+        return;
+      }
+      const url = `https://hub.docker.com/${
+        image?.is_official ? "_/" : "r/"
+      }${image?.name}`;
+      await open(url);
     },
 
     async images() {
