@@ -511,6 +511,7 @@ export async function main(denops: Denops): Promise<void> {
         if (await action.removeImage(name)) {
           console.log(`removed ${name}`);
           await action.updateImagesBuffer(denops);
+          await denops.cmd("setlocal nomodifiable");
         }
       } else {
         console.log("canceled");
@@ -527,6 +528,7 @@ export async function main(denops: Denops): Promise<void> {
         if (await action.removeContainer(name)) {
           console.log(`removed ${name}`);
           await action.updateContainersBuffer(denops);
+          await denops.cmd("setlocal nomodifiable");
         }
       } else {
         console.log("canceled");
