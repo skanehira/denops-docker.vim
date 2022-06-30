@@ -49,7 +49,11 @@ function makeImageTable(images: Image[]): string[] {
   images.forEach((image) => {
     if (image.RepoTags) {
       image.RepoTags.forEach((v) => {
-        const [repo, tag] = v.split(":");
+        const parts = v.split(":");
+        // NOTE: 'repo' maybe be 'host:port:tag'
+        const [repo, tag] = (parts.length == 2)
+          ? [parts[0], parts[1]]
+          : [[parts[0], parts[1]].join(":"), parts[2]];
         const line = [
           image.Id.substring(7, 19),
           repo,

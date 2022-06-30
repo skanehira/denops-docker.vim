@@ -1,6 +1,6 @@
-ID           REPOSITORY TAG     CREATED             SIZE     
-e216a057b1cb ubuntu     12.04   2016/09/27 06:25:51 98.78 MB 
-e216a057b1cb ubuntu     precise 2016/09/27 06:25:51 98.78 MB 
-3e314f95dcac ubuntu     12.10   2014/06/19 06:54:15 164.09 MB
-3e314f95dcac ubuntu     quantal 2014/06/19 06:54:15 164.09 MB
-e219a058b2cb ubuntu     <none>  2016/09/27 06:25:51 98.78 MB 
+ID           REPOSITORY     TAG     CREATED             SIZE     
+e216a057b1cb ubuntu         12.04   2016/09/27 06:25:51 98.78 MB 
+e216a057b1cb localhost:8080 precise 2016/09/27 06:25:51 98.78 MB 
+3e314f95dcac ubuntu         12.10   2014/06/19 06:54:15 164.09 MB
+3e314f95dcac ubuntu         quantal 2014/06/19 06:54:15 164.09 MB
+e219a058b2cb ubuntu         <none>  2016/09/27 06:25:51 98.78 MB 

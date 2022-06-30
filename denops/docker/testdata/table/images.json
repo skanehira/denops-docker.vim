@@ -4,7 +4,7 @@
     "ParentId": "",
     "RepoTags": [
       "ubuntu:12.04",
-      "ubuntu:precise"
+      "localhost:8080:precise"
     ],
     "RepoDigests": [
       "ubuntu@sha256:992069aee4016783df6345315302fa59681aae51a8eeb2f889dea59290f21787"
