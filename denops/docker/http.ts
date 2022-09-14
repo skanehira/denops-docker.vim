@@ -1,16 +1,4 @@
-import {
-  BodyReader,
-  bodyReader,
-  BufReader,
-  chunkedBodyReader,
-  closableBodyReader,
-  createBodyParser,
-  IncomingResponse,
-  promiseInterrupter,
-  TextProtoReader,
-  timeoutReader,
-  UnexpectedEofError,
-} from "./deps.ts";
+import { BufReader, io, TextProtoReader } from "./deps.ts";
 
 import { connect } from "./socket.ts";
 
@@ -44,30 +32,15 @@ function isObject(obj: unknown): obj is Record<string, unknown> {
 }
 
 export async function request<T>(req: Request): Promise<Response<T>> {
-  const reqStr = newRequest(req);
   const socket = await connect();
-
-  await socket.write(new TextEncoder().encode(reqStr));
-  const incomResp = await readResponse(socket);
-
-  const resp = {
-    status: incomResp.status,
-    header: incomResp.headers,
-  } as Response<T>;
-
-  if (incomResp.status == 200) {
-    resp.body = await incomResp.json();
-  } else if (
-    incomResp.status == 304 ||
-    incomResp.status == 204
-  ) {
-    // do nothing
-  } else {
-    const body = await incomResp.json();
-    throw body.message;
+  try {
+    const reqStr = newRequest(req);
+    await socket.write(new TextEncoder().encode(reqStr));
+    const resp = await readResponse<T>(socket);
+    return resp;
+  } finally {
+    socket.close();
   }
-  socket.close();
-  return resp;
 }
 
 export async function post(
@@ -121,9 +94,7 @@ export function newRequest(req: Request): string {
   }
   header += ` HTTP/1.1\r\nHost: localhost\r\n`;
 
-  for (
-    const [k, v] of Object.entries(req.header ?? [])
-  ) {
+  for (const [k, v] of Object.entries(req.header ?? [])) {
     header += `${k}: ${v}\r\n`;
   }
 
@@ -142,57 +113,78 @@ export function newRequest(req: Request): string {
   return reqStr;
 }
 
-/**
- * from https://deno.land/x/servest@v1.3.4/serveio.ts
- *
- * read http response from reader */
-export async function readResponse(
-  r: Deno.Reader,
-  { timeout, cancel }: { timeout?: number; cancel?: Promise<void> } = {},
-): Promise<IncomingResponse> {
+const decoder = new TextDecoder();
+
+async function read(
+  r: BufReader,
+  headers: Headers,
+): Promise<string> {
+  const contentLength = headers.get("content-length");
+  const isChunked = headers.get("transfer-encoding")! === "chunked";
+
+  if (!contentLength && !isChunked) {
+    throw new Error("unkown conetnt-length or chunked");
+  }
+
+  let body = "";
+
+  if (isChunked) {
+    const chunks = new io.Buffer();
+    while (true) {
+      const result = await r.readLine();
+      if (!result) {
+        throw new Error(
+          `unexpected chunked body: cannot find chunked data length`,
+        );
+      }
+      const chunkLength = parseInt(decoder.decode(result.line), 16);
+      if (isNaN(chunkLength)) {
+        throw new Error(`chunk length is not a number: ${result.line}`);
+      }
+      if (chunkLength === 0) {
+        r.readLine();
+        break;
+      }
+      const chunk = new Uint8Array(chunkLength);
+      const readed = await r.readFull(chunk);
+      if (!readed) {
+        break;
+      }
+      chunks.write(chunk);
+      // consume \r\n;
+      if (await r.readLine() == null) {
+        throw new Deno.errors.UnexpectedEof();
+      }
+    }
+    body = decoder.decode(chunks.bytes());
+  } else if (contentLength != null) {
+    const buf = new Uint8Array(parseInt(contentLength));
+    await r.readFull(buf);
+    body = decoder.decode(buf);
+  }
+  return body;
+}
+
+export async function readResponse<T>(r: Deno.Reader): Promise<Response<T>> {
   const reader = BufReader.create(r);
   const tp = new TextProtoReader(reader);
-  const timeoutOrCancel = promiseInterrupter({ timeout, cancel });
-  // First line: HTTP/1,1 200 OK
-  const line = await timeoutOrCancel(tp.readLine());
+  const line = await tp.readLine();
   if (line === null) {
-    throw new UnexpectedEofError();
+    throw new Deno.errors.UnexpectedEof();
   }
-  const [proto, status, statusText] = line.split(" ", 3);
-  const headers = await timeoutOrCancel(tp.readMIMEHeader());
-  if (headers === null) {
-    throw new UnexpectedEofError();
+  const status = line.split(" ", 3)[1];
+  const header = await tp.readMimeHeader();
+  if (!header) {
+    throw new Deno.errors.UnexpectedEof();
   }
-  const contentLength = headers.get("content-length");
-  const isChunked = headers.get("transfer-encoding")?.match(/^chunked/);
-  let body: BodyReader;
-  if (isChunked) {
-    const tr = timeoutReader(chunkedBodyReader(headers, reader), {
-      timeout,
-      cancel,
-    });
-    body = closableBodyReader(tr);
-  } else if (contentLength != null) {
-    const tr = timeoutReader(bodyReader(parseInt(contentLength), reader), {
-      timeout,
-      cancel,
-    });
-    body = closableBodyReader(tr);
-  } else if (status === "204" || status === "304") {
-    body = closableBodyReader(r);
-  } else {
-    throw new Error("unkown conetnt-lengh or chunked");
-  }
-  const bodyParser = createBodyParser({
-    reader: body,
-    contentType: headers.get("content-type") ?? "",
-  });
+
+  const body = status == "204" || status == "304"
+    ? ""
+    : JSON.parse(await read(reader, header));
+
   return {
-    proto,
     status: parseInt(status),
-    statusText,
-    headers,
+    header,
     body,
-    ...bodyParser,
   };
 }
