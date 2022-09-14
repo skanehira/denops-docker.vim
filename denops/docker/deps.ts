@@ -1,29 +1,15 @@
-export * from "https://deno.land/x/denops_std@v2.2.0/mod.ts";
-export { isString } from "https://deno.land/x/unknownutil@v1.1.4/mod.ts";
-export * as autocmd from "https://deno.land/x/denops_std@v2.2.0/autocmd/mod.ts";
-export { Table } from "https://deno.land/x/cliffy@v0.20.1/table/mod.ts";
-export { assertEquals } from "https://deno.land/std@0.115.1/testing/asserts.ts";
-export { BufReader } from "https://deno.land/std@0.115.1/io/buffer.ts";
-export { TextProtoReader } from "https://deno.land/std@0.115.1/textproto/mod.ts";
-export {
-  bodyReader,
-  chunkedBodyReader,
-} from "https://deno.land/std@0.115.1/http/_io.ts";
-export * from "https://deno.land/x/servest@v1.3.4/mod.ts";
-export {
-  closableBodyReader,
-  timeoutReader,
-} from "https://deno.land/x/servest@v1.3.4/_readers.ts";
-export { UnexpectedEofError } from "https://deno.land/x/servest@v1.3.4/error.ts";
-export {
-  promiseInterrupter,
-} from "https://deno.land/x/servest@v1.3.4/_util.ts";
-export { createBodyParser } from "https://deno.land/x/servest@v1.3.4/body_parser.ts";
-
-export { datetime } from "https://deno.land/x/ptera@v1.0.0-beta/mod.ts";
-export * as mapping from "https://deno.land/x/denops_std@v2.0.0/mapping/mod.ts";
-export * as mapType from "https://deno.land/x/denops_std@v2.0.0/mapping/types.ts";
-export * as vars from "https://deno.land/x/denops_std@v2.2.0/variable/mod.ts";
-export * as path from "https://deno.land/std@0.138.0/path/mod.ts";
-export * as fs from "https://deno.land/std@0.138.0/fs/mod.ts";
-export { open } from "https://deno.land/x/open@v0.0.2/index.ts";
+export * from "https://deno.land/x/denops_std@v3.8.2/mod.ts";
+export { isString } from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
+export * as autocmd from "https://deno.land/x/denops_std@v3.8.2/autocmd/mod.ts";
+export { Table } from "https://deno.land/x/cliffy@v0.25.1/table/mod.ts";
+export { assertEquals } from "https://deno.land/std@0.155.0/testing/asserts.ts";
+export { BufReader } from "https://deno.land/std@0.155.0/io/buffer.ts";
+export { TextProtoReader } from "https://deno.land/std@0.155.0/textproto/mod.ts";
+export { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
+export * as mapping from "https://deno.land/x/denops_std@v3.8.2/mapping/mod.ts";
+export * as mapType from "https://deno.land/x/denops_std@v3.8.2/mapping/types.ts";
+export * as vars from "https://deno.land/x/denops_std@v3.8.2/variable/mod.ts";
+export * as path from "https://deno.land/std@0.155.0/path/mod.ts";
+export * as fs from "https://deno.land/std@0.155.0/fs/mod.ts";
+export { open } from "https://deno.land/x/open@v0.0.5/index.ts";
+export * as io from "https://deno.land/std@0.155.0/io/buffer.ts";

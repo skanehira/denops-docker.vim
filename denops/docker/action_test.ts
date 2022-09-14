@@ -46,9 +46,9 @@ Deno.test("search image", async () => {
   const got = await action.searchImage("test");
   const want = [
     "NAME            DESCRIPTION STARTS OFFICIAL AUTOMATED",
-    "wma55/u1210sshd                                      ",
-    "jdswinbank/sshd                                      ",
-    "vgauthier/sshd                                       ",
+    "wma55/u1210sshd             0                        ",
+    "jdswinbank/sshd             0                        ",
+    "vgauthier/sshd              0                        ",
   ];
   assertEquals(got, want);
 });

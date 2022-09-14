@@ -69,9 +69,7 @@ function doDown() {
 }
 
 function doTest() {
-  # TODO enable type check
-  # https://github.com/keroxp/servest/issues/170
-  deno test -A --unstable --coverage=cov --no-check=remote "https://deno.land/x/servest@v1.3.4/testing.ts" .
+  deno test -A --unstable --coverage=cov .
   exit_code=$?
   if [ ${exit_code} != 0 ]; then
     exit ${exit_code}
