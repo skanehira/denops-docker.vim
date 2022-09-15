@@ -29,6 +29,3 @@ This is the new version of [docker.vim](https://github.com/skanehira/docker.vim)
 
 ## Author
 skanehira
-
-## Thanks
-Parsing http response based in https://github.com/keroxp/servest
