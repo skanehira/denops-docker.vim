@@ -52,7 +52,7 @@ function doUp() {
     docker run --rm -v ${PWD}:/mock --name ${container_api} \
       --net ${container_network} \
       -p 9999:4010 \
-      -d stoplight/prism mock \
+      -d stoplight/prism:4.10.1 mock \
       -h 0.0.0.0 /mock/swagger.yaml
     docker run --rm --net $container_network jwilder/dockerize -timeout 180s -wait http://${container_api}:4010/containers/json
   fi

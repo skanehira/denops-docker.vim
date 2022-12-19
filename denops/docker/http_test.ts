@@ -4,7 +4,7 @@ import { assertEquals } from "./deps.ts";
 import * as socket from "./socket.ts";
 
 Deno.test("http get 200", async () => {
-  const filePath = await Deno.makeTempFile();
+  const filePath = await Deno.makeTempDir() + "/docker.sock";
   const listener = Deno.listen({ path: filePath, transport: "unix" });
   listener.accept().then(
     async (conn): Promise<void> => {
