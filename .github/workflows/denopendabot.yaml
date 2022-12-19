@@ -11,3 +11,4 @@ jobs:
       - uses: hasundue/denopendabot@0.14.0
         with:
           user-token: ${{ secrets.GH_TOKEN }}
+          include: denops/docker/deps.ts

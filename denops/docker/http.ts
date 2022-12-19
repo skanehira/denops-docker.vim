@@ -1,5 +1,5 @@
-import { BufReader, io, TextProtoReader } from "./deps.ts";
-
+import { Buffer } from "./deps.ts";
+import { BufReader, TextProtoReader } from "./deps_deprecated.ts";
 import { connect } from "./socket.ts";
 
 export interface Request {
@@ -129,7 +129,7 @@ async function read(
   let body = "";
 
   if (isChunked) {
-    const chunks = new io.Buffer();
+    const chunks = new Buffer();
     while (true) {
       const result = await r.readLine();
       if (!result) {
