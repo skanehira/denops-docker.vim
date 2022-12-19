@@ -289,6 +289,11 @@ export async function main(denops: Denops): Promise<void> {
       await denops.cmd("redraw!");
     },
 
+    async containerOpenBrowser() {
+      const container = await getContainer(denops);
+      await action.openBrowser(denops, container.Id);
+    },
+
     async containers() {
       await action.updateContainersBuffer(denops);
 
@@ -384,6 +389,13 @@ export async function main(denops: Denops): Promise<void> {
           rhs:
             `:call denops#notify("${denops.name}", "editContainerFile", [])<CR>`,
           default: "E",
+        },
+        {
+          mode: ["n"],
+          lhs: "<Plug>(docker-container-open-browser)",
+          rhs:
+            `:call denops#notify("${denops.name}", "containerOpenBrowser", [])<CR>`,
+          default: "<C-o>",
         },
       ];
 

@@ -164,6 +164,9 @@ KEY-MAPPINGS					*docker-key-mappings*
 <Plug>(docker-container-copy-from)		*<Plug>(docker-container-copy-from)*
   Copy file to from a container.
 
+<Plug>(docker-container-open-browser)		*<Plug>(docker-container-open-browser)*
+  Open browser if port is map to host.
+
 <Plug>(docker-pull-image)			*<Plug>(docker-pull-image)*
   Pull specified image in |docker-hub|
 
@@ -196,6 +199,7 @@ default mappings
 			`normal`	ct	<Plug>(docker-container-copy-to)
 			`normal`	cf	<Plug>(docker-container-copy-from)
 			`normal`	E 	<Plug>(docker-container-edit-file)
+			`normal`	<C-o> 	<Plug>(docker-container-open-browser)
 |docker-hub|		`normal`	<CR>	<Plug>(docker-pull-image)
 			`normal`	q	<Plug>(docker-buffer-close)
 			`normal`	<C-o>	<Plug>(docker-open-dockerhub)
