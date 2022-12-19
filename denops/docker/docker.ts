@@ -32,7 +32,7 @@ export async function images(): Promise<Image[]> {
 
 export async function inspect(
   id: string,
-): Promise<string[]> {
+): Promise<string> {
   const p = Deno.run({
     cmd: ["docker", "inspect", id],
     stdout: "piped",
@@ -42,7 +42,7 @@ export async function inspect(
   const output = await p.output();
   p.close();
   const result = dec.decode(output);
-  return result.split("\n");
+  return result;
 }
 
 export async function removeImage(

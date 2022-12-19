@@ -2,7 +2,8 @@ import { Denops } from "./deps.ts";
 import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
-import { vars } from "./deps.ts";
+import { open, vars } from "./deps.ts";
+import { Container } from "./types.ts";
 
 export async function runDockerCLI(denops: Denops, args: unknown[]) {
   const cmd = new Array<string>("docker");
@@ -73,7 +74,7 @@ export async function stopContainer(
   return resp.status < 300;
 }
 
-export async function killContainer(id: string) {
+async function getContainer(id: string): Promise<Container> {
   const containers = await docker.containers({
     all: true,
     filters: {
@@ -82,17 +83,39 @@ export async function killContainer(id: string) {
   });
 
   if (containers.length === 0) {
-    console.error(`not found container: ${id}`);
-    return false;
+    throw new Error(`not found container: ${id}`);
   }
 
-  if (containers[0].State !== "running") {
-    console.warn(`${id} is not running`);
+  return containers[0];
+}
+
+export async function killContainer(id: string) {
+  try {
+    const container = await getContainer(id);
+    if (container.State !== "running") {
+      throw new Error(`${id} is not running`);
+    }
+    const resp = await docker.killContainer(id);
+    return resp.status < 300;
+  } catch (e) {
+    console.error(e.message);
     return false;
   }
+}
 
-  const resp = await docker.killContainer(id);
-  return resp.status < 300;
+export async function openBrowser(denops: Denops, id: string) {
+  const container = await getContainer(id);
+  const choices: string[] = [];
+  const ports: string[] = [];
+  container.Ports.forEach((p, i) => {
+    const hostPort = `http://${p.IP}:${p.PublicPort}`;
+    ports.push(hostPort);
+    choices.push(`${i}: ${hostPort}`);
+  });
+  if (ports.length) {
+    const choice = await denops.call("inputlist", choices) as number;
+    await open(ports[choice]);
+  }
 }
 
 export async function searchImage(
@@ -139,7 +162,7 @@ export async function inspect(denops: Denops, id: string) {
     `drop docker://inspect/${id}`,
   );
   const result = await docker.inspect(id);
-  await denops.call("setline", 1, result);
+  await denops.call("setline", 1, result.split("\n"));
   await denops.cmd(
     "setlocal ft=json buftype=nofile bufhidden=wipe nolist nomodifiable nomodified",
   );
