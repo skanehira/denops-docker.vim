@@ -1,7 +1,7 @@
 export * from "https://deno.land/x/denops_std@v3.12.1/mod.ts";
 export { isString } from "https://deno.land/x/unknownutil@v2.1.0/mod.ts";
 export * as autocmd from "https://deno.land/x/denops_std@v3.12.1/autocmd/mod.ts";
-export { Table } from "https://deno.land/x/cliffy@v0.25.6/table/mod.ts";
+export { Table } from "https://deno.land/x/cliffy@v0.25.7/table/mod.ts";
 export { assertEquals } from "https://deno.land/std@0.170.0/testing/asserts.ts";
 export { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
 export * as mapping from "https://deno.land/x/denops_std@v3.12.1/mapping/mod.ts";
