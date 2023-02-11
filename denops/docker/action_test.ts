@@ -7,11 +7,11 @@ socket.transport.kind = "tcp";
 Deno.test("get images", async () => {
   const got = await action.getImages();
   const want = [
-    "ID           REPOSITORY TAG     CREATED             SIZE     ",
-    "e216a057b1cb ubuntu     12.04   2016/09/27 06:25:51 98.78 MB ",
-    "e216a057b1cb ubuntu     precise 2016/09/27 06:25:51 98.78 MB ",
-    "3e314f95dcac ubuntu     12.10   2014/06/19 06:54:15 164.09 MB",
-    "3e314f95dcac ubuntu     quantal 2014/06/19 06:54:15 164.09 MB",
+    "ID           REPOSITORY TAG     STATUS CREATED             SIZE     ",
+    "e216a057b1cb ubuntu     12.04   In use 2016/09/27 06:25:51 98.78 MB ",
+    "e216a057b1cb ubuntu     precise In use 2016/09/27 06:25:51 98.78 MB ",
+    "3e314f95dcac ubuntu     12.10   In use 2014/06/19 06:54:15 164.09 MB",
+    "3e314f95dcac ubuntu     quantal In use 2014/06/19 06:54:15 164.09 MB",
   ];
 
   assertEquals(got, want);

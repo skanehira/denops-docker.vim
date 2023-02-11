@@ -22,7 +22,6 @@ export async function images(): Promise<Image[]> {
         ancestor: [image.Id],
       },
     });
-    // NOTE: this field is not returned from the API, added field just for display
     image["UsedContainers"] = usedContainers;
 
     // NOTE: to be able remove image when same id
