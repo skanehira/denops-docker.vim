@@ -15,8 +15,16 @@ const dec = new TextDecoder();
 export async function images(): Promise<Image[]> {
   const resp = await http.get<Image[]>("/images/json");
   const images: Image[] = [];
-  // NOTE: to be able remove image when same id
   for (const image of resp.body) {
+    const usedContainers = await containers({
+      all: true,
+      filters: {
+        ancestor: [image.Id],
+      },
+    });
+    image["UsedContainers"] = usedContainers;
+
+    // NOTE: to be able remove image when same id
     if (image.RepoTags && image.RepoTags.length > 1) {
       for (const tag of image.RepoTags) {
         const i: Image = Object.assign({}, image);

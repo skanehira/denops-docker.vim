@@ -10,6 +10,8 @@ export interface Image {
   SharedSize: number;
   Labels: Record<string, unknown>;
   Containers: number;
+  // NOTE: this field is not returned from the API, added field just for display
+  UsedContainers: Container[];
 }
 
 export interface Container {
@@ -45,6 +47,7 @@ export interface ContainerListFilters {
   id?: string[];
   exited?: number[];
   status?: ContainerStatus[];
+  ancestor?: string[];
 }
 
 export interface ContainerListParams {

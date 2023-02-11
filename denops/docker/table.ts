@@ -47,6 +47,7 @@ function makeSearchImage(images: SearchImage[]): string[] {
 function makeImageTable(images: Image[]): string[] {
   const body = new Array<Array<string | number>>();
   images.forEach((image) => {
+    const status = image.UsedContainers.length > 0 ? "In use" : "";
     if (image.RepoTags) {
       image.RepoTags.forEach((v) => {
         const parts = v.split(":");
@@ -58,6 +59,7 @@ function makeImageTable(images: Image[]): string[] {
           image.Id.substring(7, 19),
           repo,
           tag,
+          status,
           datetime(image.Created * 1000).format(dateFormat),
           formatBytes(image.Size),
         ];
@@ -70,6 +72,7 @@ function makeImageTable(images: Image[]): string[] {
           image.Id.substring(7, 19),
           repo,
           "<none>",
+          status,
           datetime(image.Created * 1000).format(dateFormat),
           formatBytes(image.Size),
         ];
@@ -78,7 +81,7 @@ function makeImageTable(images: Image[]): string[] {
     }
   });
 
-  const header = ["ID", "REPOSITORY", "TAG", "CREATED", "SIZE"];
+  const header = ["ID", "REPOSITORY", "TAG", "STATUS", "CREATED", "SIZE"];
 
   const table = new Table();
   table.header(header)
