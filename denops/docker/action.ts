@@ -108,13 +108,17 @@ export async function openBrowser(denops: Denops, id: string) {
   const choices: string[] = [];
   const ports: string[] = [];
   container.Ports.forEach((p, i) => {
-    const hostPort = `http://${p.IP}:${p.PublicPort}`;
-    ports.push(hostPort);
-    choices.push(`${i}: ${hostPort}`);
+    if (p.PublicPort) {
+      const hostPort = `http://${p.IP}:${p.PublicPort}`;
+      ports.push(hostPort);
+      choices.push(`${i + 1}: ${hostPort}`);
+    }
   });
   if (ports.length) {
-    const choice = await denops.call("inputlist", choices) as number;
-    await open(ports[choice]);
+    const choice = await denops.call("inputlist", choices) as number - 1;
+    if (choice >= 0) {
+      await open(ports[choice]);
+    }
   }
 }
 
