@@ -9,5 +9,5 @@ export * as mapType from "https://deno.land/x/denops_std@v4.1.5/mapping/types.ts
 export * as vars from "https://deno.land/x/denops_std@v4.1.5/variable/mod.ts";
 export * as path from "https://deno.land/std@0.184.0/path/mod.ts";
 export * as fs from "https://deno.land/std@0.184.0/fs/mod.ts";
-export { open } from "https://deno.land/x/open@v0.0.5/index.ts";
+export { open } from "https://deno.land/x/open@v0.0.6/index.ts";
 export { Buffer } from "https://deno.land/std@0.184.0/io/buffer.ts";
