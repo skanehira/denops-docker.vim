@@ -1,4 +1,4 @@
-import { Denops, path } from "./deps.ts";
+import { dax, Denops, path } from "./deps.ts";
 import * as http from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
@@ -9,8 +9,6 @@ import {
   removeImageOpts,
   SearchImage,
 } from "./types.ts";
-
-const dec = new TextDecoder();
 
 export async function images(): Promise<Image[]> {
   const resp = await http.get<Image[]>("/images/json");
@@ -41,16 +39,7 @@ export async function images(): Promise<Image[]> {
 export async function inspect(
   id: string,
 ): Promise<string> {
-  const p = Deno.run({
-    cmd: ["docker", "inspect", id],
-    stdout: "piped",
-    stderr: "piped",
-  });
-
-  const output = await p.output();
-  p.close();
-  const result = dec.decode(output);
-  return result;
+  return await dax.$`docker inspect ${id}`.text();
 }
 
 export async function removeImage(
@@ -201,26 +190,7 @@ export async function copyFileToContainer(
   from: string,
   to: string,
 ): Promise<void> {
-  const opt: Deno.RunOptions = {
-    cmd: [
-      "docker",
-      "cp",
-      from,
-      `${id}:${to}`,
-    ],
-    stdin: "null",
-    stdout: "null",
-    stderr: "piped",
-  };
-
-  const p = Deno.run(opt);
-  const status = await p.status();
-  if (!status.success) {
-    const error = await p.stderrOutput();
-    throw new Error(`failed to copy file to container: ${dec.decode(error)}`);
-  }
-  p.stderr?.close();
-  p.close();
+  await dax.$`docker cp ${from} ${id}:${to}`;
 }
 
 export async function copyFileFromContainer(
@@ -228,26 +198,7 @@ export async function copyFileFromContainer(
   from: string,
   to: string,
 ): Promise<void> {
-  const opt: Deno.RunOptions = {
-    cmd: [
-      "docker",
-      "cp",
-      `${id}:${from}`,
-      to,
-    ],
-    stdin: "null",
-    stdout: "null",
-    stderr: "piped",
-  };
-
-  const p = Deno.run(opt);
-  const status = await p.status();
-  if (!status.success) {
-    const error = await p.stderrOutput();
-    throw new Error(`failed to copy file from container: ${dec.decode(error)}`);
-  }
-  p.stderr?.close();
-  p.close();
+  await dax.$`docker cp ${id}:${from} ${to}`;
 }
 
 export type DirectoryItemType = "dir" | "file";
@@ -262,29 +213,7 @@ export async function containerFiles(
   id: string,
   path: string,
 ): Promise<DirectoryItem[]> {
-  const opt: Deno.RunOptions = {
-    cmd: [
-      "docker",
-      "exec",
-      id,
-      "ls",
-      "-la",
-      path,
-    ],
-    stdin: "null",
-    stdout: "piped",
-    stderr: "null",
-  };
-
-  const p = Deno.run(opt);
-  const status = await p.status();
-  p.close();
-  if (!status.success) {
-    throw new Error(
-      `failed to get directory info from ${id}`,
-    );
-  }
-  const out = dec.decode(await p.output());
+  const out = await dax.$`docker exec ${id} ls -la ${path}`.text();
   return parseDirectoryItems(out, path);
 }
 
