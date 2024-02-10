@@ -1,5 +1,5 @@
 export * from "https://deno.land/x/denops_std@v5.3.0/mod.ts";
-export { isString } from "https://deno.land/x/unknownutil@v3.15.0/mod.ts";
+export { isString } from "https://deno.land/x/unknownutil@v3.14.1/mod.ts";
 export * as autocmd from "https://deno.land/x/denops_std@v5.3.0/autocmd/mod.ts";
 export { Table } from "https://deno.land/x/cliffy@v0.25.7/table/mod.ts";
 export { assertEquals } from "https://deno.land/std@0.215.0/assert/assert_equals.ts";
@@ -11,4 +11,4 @@ export * as path from "https://deno.land/std@0.215.0/path/mod.ts";
 export * as fs from "https://deno.land/std@0.215.0/fs/mod.ts";
 export { open } from "https://deno.land/x/open@v0.0.6/index.ts";
 export { Buffer } from "https://deno.land/std@0.215.0/io/buffer.ts";
-export * as dax from "https://deno.land/x/dax@0.38.0/mod.ts";
+export * as dax from "https://deno.land/x/dax@0.39.1/mod.ts";
