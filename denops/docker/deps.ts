@@ -1,5 +1,5 @@
 export * from "https://deno.land/x/denops_std@v6.0.1/mod.ts";
-export { isString } from "https://deno.land/x/unknownutil@v3.15.0/mod.ts";
+export { isString } from "https://deno.land/x/unknownutil@v3.16.0/mod.ts";
 export * as autocmd from "https://deno.land/x/denops_std@v6.0.1/autocmd/mod.ts";
 export { Table } from "https://deno.land/x/cliffy@v0.25.7/table/mod.ts";
 export { assertEquals } from "https://deno.land/std@0.215.0/assert/assert_equals.ts";
