@@ -11,4 +11,4 @@ export * as path from "https://deno.land/std@0.216.0/path/mod.ts";
 export * as fs from "https://deno.land/std@0.216.0/fs/mod.ts";
 export { open } from "https://deno.land/x/open@v0.0.6/index.ts";
 export { Buffer } from "https://deno.land/std@0.216.0/io/buffer.ts";
-export * as dax from "https://deno.land/x/dax@0.39.1/mod.ts";
+export * as dax from "https://deno.land/x/dax@0.39.2/mod.ts";
