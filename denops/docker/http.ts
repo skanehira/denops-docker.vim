@@ -48,7 +48,7 @@ export async function post(
   opts?: Options,
 ): Promise<Response> {
   const resp = await request(
-    <Request> {
+    {
       url: endpoint,
       method: "POST",
       header: opts?.header,
@@ -60,7 +60,7 @@ export async function post(
 
 export async function del(endpoint: string, opts?: Options): Promise<Response> {
   const resp = await request(
-    <Request> {
+    {
       url: endpoint,
       method: "DELETE",
       header: opts?.header,
@@ -75,7 +75,7 @@ export async function get<T>(
   opts?: Options,
 ): Promise<Response<T>> {
   const resp = await request<T>(
-    <Request> {
+    {
       url: endpoint,
       header: opts?.header,
       params: opts?.params,
