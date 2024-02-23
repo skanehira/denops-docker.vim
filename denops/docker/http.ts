@@ -98,6 +98,10 @@ export function newRequest(req: Request): string {
     header += `${k}: ${v}\r\n`;
   }
 
+  // NOTE(skanehira): docker will be slow without user agent header
+  // ref: https://github.com/moby/moby/issues/47439
+  header += `User-Agent: Docker-Client/25.0.3\r\n`
+
   let reqStr = `${header}\r\n`;
   if ("data" in req) {
     let data = req.data;
