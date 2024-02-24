@@ -49,7 +49,7 @@ Deno.test("http get with options", () => {
 
   assertEquals(
     reqStr,
-    `GET test?json=1&sort=desc&all=true HTTP/1.1\r\nHost: localhost\r\nh1: v1\r\nh2: v2\r\n\r\n{"name":"gorilla","age":28}\r\n`,
+    `GET test?json=1&sort=desc&all=true HTTP/1.1\r\nHost: localhost\r\nh1: v1\r\nh2: v2\r\nUser-Agent: Docker-Client/25.0.3\r\n\r\n{"name":"gorilla","age":28}\r\n`,
   );
 });
 
@@ -61,6 +61,6 @@ Deno.test("http get without options", () => {
 
   assertEquals(
     reqStr,
-    `GET test HTTP/1.1\r\nHost: localhost\r\n\r\n`,
+    `GET test HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Docker-Client/25.0.3\r\n\r\n`,
   );
 });
