@@ -1,12 +1,12 @@
-export * from "https://deno.land/x/denops_std@v6.1.0/mod.ts";
+export * from "https://deno.land/x/denops_std@v6.4.0/mod.ts";
 export { isString } from "https://deno.land/x/unknownutil@v3.16.3/mod.ts";
-export * as autocmd from "https://deno.land/x/denops_std@v6.1.0/autocmd/mod.ts";
+export * as autocmd from "https://deno.land/x/denops_std@v6.4.0/autocmd/mod.ts";
 export { Table } from "https://deno.land/x/cliffy@v0.25.7/table/mod.ts";
 export { assertEquals } from "https://deno.land/std@0.220.1/assert/assert_equals.ts";
 export { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
-export * as mapping from "https://deno.land/x/denops_std@v6.1.0/mapping/mod.ts";
-export * as mapType from "https://deno.land/x/denops_std@v6.1.0/mapping/types.ts";
-export * as vars from "https://deno.land/x/denops_std@v6.1.0/variable/mod.ts";
+export * as mapping from "https://deno.land/x/denops_std@v6.4.0/mapping/mod.ts";
+export * as mapType from "https://deno.land/x/denops_std@v6.4.0/mapping/types.ts";
+export * as vars from "https://deno.land/x/denops_std@v6.4.0/variable/mod.ts";
 export * as path from "https://deno.land/std@0.220.1/path/mod.ts";
 export * as fs from "https://deno.land/std@0.220.1/fs/mod.ts";
 export { open } from "https://deno.land/x/open@v0.0.6/index.ts";
