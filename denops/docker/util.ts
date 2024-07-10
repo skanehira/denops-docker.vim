@@ -1,6 +1,5 @@
 import { Container, Image, SearchImage } from "./types.ts";
-import { Denops } from "./deps.ts";
-import { vars } from "./deps.ts";
+import { Denops, vars } from "./deps.ts";
 
 // from https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
 export function formatBytes(bytes: number, decimals?: number) {
@@ -38,7 +37,7 @@ export async function getEntry<T>(denops: Denops, varname: string): Promise<T> {
     varname,
   ) as T[];
   if (!entries || entries.length === 0) {
-    throw new Error("no images");
+    throw new Error(`No ${varname} found`);
   }
   const idx = (await denops.call("line", ".") as number) - 2;
   return entries[idx];

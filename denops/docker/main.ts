@@ -493,9 +493,12 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
 
-    async tailContainerLogs() {
-      const name = (await getContainer(denops)).Names[0];
-      await docker.tailContainerLogs(denops, name);
+    async tailContainerLogs(name?: unknown) {
+      let cname = name as string;
+      if (!name) {
+        cname = (await getContainer(denops)).Names[0];
+      }
+      await docker.tailContainerLogs(denops, cname);
     },
 
     async inspectImage() {
