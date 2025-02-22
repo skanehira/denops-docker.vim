@@ -1,8 +1,9 @@
-import { Denops } from "./deps.ts";
+import { Denops } from "jsr:@denops/std@^7.0.0";
+import * as vars from "jsr:@denops/std@^7.0.0/variable";
+import open from "jsr:@rdsq/open@1.0.1";
 import { runTerminal } from "./vim_util.ts";
 import * as docker from "./docker.ts";
 import { makeTableString } from "./table.ts";
-import { open, vars } from "./deps.ts";
 import { Container } from "./types.ts";
 
 export async function runDockerCLI(denops: Denops, args: unknown[]) {
@@ -98,7 +99,7 @@ export async function killContainer(id: string) {
     const resp = await docker.killContainer(id);
     return resp.status < 300;
   } catch (e) {
-    console.error(e.message);
+    console.error((e as Error).message);
     return false;
   }
 }

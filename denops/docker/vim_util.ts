@@ -1,4 +1,4 @@
-import { Denops } from "./deps.ts";
+import { Denops } from "jsr:@denops/std@^7.0.0";
 
 export async function runTerminal(denops: Denops, cmd: string[]) {
   if (denops.meta.host === "nvim") {

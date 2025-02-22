@@ -1,4 +1,6 @@
-import { dax, Denops, path } from "./deps.ts";
+import $ from "jsr:@david/dax@0.42.0";
+import { Denops } from "jsr:@denops/std@^7.0.0";
+import { join } from "jsr:@std/path@1.0.8";
 import * as http from "./http.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
@@ -39,7 +41,7 @@ export async function images(): Promise<Image[]> {
 export async function inspect(
   id: string,
 ): Promise<string> {
-  return await dax.$`docker inspect ${id}`.text();
+  return await $`docker inspect ${id}`.text();
 }
 
 export async function removeImage(
@@ -190,7 +192,7 @@ export async function copyFileToContainer(
   from: string,
   to: string,
 ): Promise<void> {
-  await dax.$`docker cp ${from} ${id}:${to}`;
+  await $`docker cp ${from} ${id}:${to}`;
 }
 
 export async function copyFileFromContainer(
@@ -198,7 +200,7 @@ export async function copyFileFromContainer(
   from: string,
   to: string,
 ): Promise<void> {
-  await dax.$`docker cp ${id}:${from} ${to}`;
+  await $`docker cp ${id}:${from} ${to}`;
 }
 
 export type DirectoryItemType = "dir" | "file";
@@ -213,7 +215,7 @@ export async function containerFiles(
   id: string,
   path: string,
 ): Promise<DirectoryItem[]> {
-  const out = await dax.$`docker exec ${id} ls -la ${path}`.text();
+  const out = await $`docker exec ${id} ls -la ${path}`.text();
   return parseDirectoryItems(out, path);
 }
 
@@ -237,7 +239,7 @@ export function parseDirectoryItems(
     items.push(
       {
         name: fname,
-        path: path.join(parentPath, ftype === "dir" ? fname + "/" : fname),
+        path: join(parentPath, ftype === "dir" ? fname + "/" : fname),
         type: ftype,
       },
     );

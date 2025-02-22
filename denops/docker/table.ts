@@ -1,8 +1,6 @@
-import { datetime, Table } from "./deps.ts";
+import { Table } from "jsr:@cliffy/table@1.0.0-rc.7";
 import type { Container, Image, Port, SearchImage } from "./types.ts";
-import { formatBytes } from "./util.ts";
-
-const dateFormat = "YYYY/MM/dd HH:mm:ss";
+import { formatBytes, formatDate } from "./util.ts";
 
 export type TableKind = "images" | "containers" | "searchImages";
 
@@ -60,7 +58,7 @@ function makeImageTable(images: Image[]): string[] {
           repo,
           tag,
           status,
-          datetime(image.Created * 1000).format(dateFormat),
+          formatDate(new Date(image.Created * 1000)),
           formatBytes(image.Size),
         ];
         body.push(line);
@@ -73,7 +71,7 @@ function makeImageTable(images: Image[]): string[] {
           repo,
           "<none>",
           status,
-          datetime(image.Created * 1000).format(dateFormat),
+          formatDate(new Date(image.Created * 1000)),
           formatBytes(image.Size),
         ];
         body.push(line);
@@ -100,7 +98,7 @@ function makeContainerTable(containers: Container[]): string[] {
         ? `${container.Image.substring(0, 20)}...`
         : container.Image,
       container.Status,
-      datetime(container.Created * 1000).format(dateFormat),
+      formatDate(new Date(container.Created * 1000)),
       container.Ports.map((port) => {
         return portString(port);
       }).join(", "),

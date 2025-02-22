@@ -1,5 +1,6 @@
+import { Denops } from "jsr:@denops/std@^7.0.0";
+import * as vars from "jsr:@denops/std@^7.0.0/variable";
 import { Container, Image, SearchImage } from "./types.ts";
-import { Denops, vars } from "./deps.ts";
 
 // from https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
 export function formatBytes(bytes: number, decimals?: number) {
@@ -67,4 +68,17 @@ export async function getImageName(denops: Denops): Promise<string> {
 
 export async function getSearchImage(denops: Denops): Promise<SearchImage> {
   return await getEntry<SearchImage>(denops, "docker_images");
+}
+
+export function formatDate(date: Date) {
+  const pad = (n: number) => (n < 10 ? "0" + n : n);
+
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
