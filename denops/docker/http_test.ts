@@ -1,6 +1,6 @@
+import { assertEquals } from "jsr:@std/assert@1.0.11";
 import { writeConn } from "./testutil.ts";
 import * as http from "./http.ts";
-import { assertEquals } from "./deps.ts";
 import * as socket from "./socket.ts";
 
 Deno.test("http get 200", async () => {

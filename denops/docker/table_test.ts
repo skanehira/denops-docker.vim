@@ -1,6 +1,6 @@
+import { assertEquals } from "jsr:@std/assert@1.0.11";
 import { makeTableString, TableKind } from "./table.ts";
 import { Image } from "./types.ts";
-import { assertEquals } from "./deps.ts";
 import { readFile, readJSON } from "./testutil.ts";
 
 {

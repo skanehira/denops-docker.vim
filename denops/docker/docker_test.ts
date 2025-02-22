@@ -1,5 +1,5 @@
+import { assertEquals } from "jsr:@std/assert@1.0.11";
 import { parseDirectoryItems } from "./docker.ts";
-import { assertEquals } from "./deps.ts";
 
 Deno.test("parse directory items", () => {
   const input = `

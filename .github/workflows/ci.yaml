@@ -12,7 +12,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        deno-version: [v1.x]
+        deno-version: [v2.x]
         os: [ubuntu-latest]
     name: deno lint
     runs-on: ${{ matrix.os }}
@@ -26,7 +26,7 @@ jobs:
   test:
     strategy:
       matrix:
-        deno-version: [v1.x]
+        deno-version: [v2.x]
         os: [ubuntu-latest]
     name: deno test
     runs-on: ${{ matrix.os }}

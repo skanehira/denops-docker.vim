@@ -1,4 +1,4 @@
-import { Buffer } from "./deps.ts";
+import { Buffer } from "jsr:@std/io@0.225.2/buffer";
 import { BufReader, TextProtoReader } from "./deps_deprecated.ts";
 import { connect } from "./socket.ts";
 
@@ -169,7 +169,7 @@ async function read(
   return body;
 }
 
-export async function readResponse<T>(r: Deno.Reader): Promise<Response<T>> {
+export async function readResponse<T>(r: Deno.Conn): Promise<Response<T>> {
   const reader = BufReader.create(r);
   const tp = new TextProtoReader(reader);
   const line = await tp.readLine();

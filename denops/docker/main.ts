@@ -1,14 +1,15 @@
-import {
-  autocmd,
-  Denops,
-  fs,
-  isString,
-  mapping,
-  mapType,
-  open,
-  path,
-  vars,
-} from "./deps.ts";
+import { basename, dirname, join } from "jsr:@std/path@1.0.8";
+import * as fs from "jsr:@std/fs@1.0.13";
+import * as vars from "jsr:@denops/std@^7.0.0/variable";
+import * as mapping from "jsr:@denops/std@^7.0.0/mapping";
+import * as autocmd from "jsr:@denops/std@^7.0.0/autocmd";
+import type { Entrypoint } from "jsr:@denops/std@^7.0.0";
+import { isString } from "jsr:@core/unknownutil@4.3.0";
+import open from "jsr:@rdsq/open@1.0.1";
+import * as docker from "./docker.ts";
+import * as action from "./action.ts";
+import { makeTableString } from "./table.ts";
+import { SearchImage } from "./types.ts";
 import { runTerminal } from "./vim_util.ts";
 import {
   buildDockerCommand,
@@ -16,12 +17,8 @@ import {
   getImageName,
   getSearchImage,
 } from "./util.ts";
-import * as docker from "./docker.ts";
-import * as action from "./action.ts";
-import { makeTableString } from "./table.ts";
-import { SearchImage } from "./types.ts";
 
-export async function main(denops: Denops): Promise<void> {
+export const main: Entrypoint = async (denops) => {
   const commands: string[] = [
     `command! DockerImages :e docker://images`,
     `command! DockerContainers :e docker://containers`,
@@ -71,7 +68,7 @@ export async function main(denops: Denops): Promise<void> {
       const [name, fpath] = args as string[];
       const directories = await docker.containerFiles(
         name,
-        fpath.at(-1) === "/" ? fpath : path.dirname(fpath),
+        fpath.at(-1) === "/" ? fpath : dirname(fpath),
       );
       return directories;
     },
@@ -83,9 +80,9 @@ export async function main(denops: Denops): Promise<void> {
         return;
       }
       const tmpdir = await Deno.makeTempDir();
-      const host_filepath = path.join(
+      const host_filepath = join(
         tmpdir,
-        path.basename(container_filepath),
+        basename(container_filepath),
       );
       fs.ensureFile(host_filepath);
       await action.copyFileFromContainer(id, container_filepath, host_filepath);
@@ -143,7 +140,7 @@ export async function main(denops: Denops): Promise<void> {
           }
           const cmd = buildDockerCommand(line, command);
           if (cmd.length) {
-            runTerminal(denops, cmd);
+            await runTerminal(denops, cmd);
           }
         }
       }
@@ -195,7 +192,7 @@ export async function main(denops: Denops): Promise<void> {
 
         for (const m of keymaps) {
           mapping.map(denops, m.lhs, m.rhs, {
-            mode: m.mode as mapType.Mode[],
+            mode: m.mode as mapping.Mode[],
             buffer: true,
             silent: true,
             noremap: true,
@@ -233,7 +230,7 @@ export async function main(denops: Denops): Promise<void> {
       const url = `https://hub.docker.com/${
         image?.is_official ? "_/" : "r/"
       }${image?.name}`;
-      await open(url);
+      open(url);
     },
 
     async images() {
@@ -273,7 +270,7 @@ export async function main(denops: Denops): Promise<void> {
 
       for (const m of keymaps) {
         mapping.map(denops, m.lhs, m.rhs, {
-          mode: m.mode as mapType.Mode[],
+          mode: m.mode as mapping.Mode[],
           buffer: true,
           silent: true,
           noremap: true,
@@ -401,7 +398,7 @@ export async function main(denops: Denops): Promise<void> {
 
       for (const m of keymaps) {
         mapping.map(denops, m.lhs, m.rhs, {
-          mode: m.mode as mapType.Mode[],
+          mode: m.mode as mapping.Mode[],
           buffer: true,
           silent: true,
           noremap: true,
@@ -550,4 +547,4 @@ export async function main(denops: Denops): Promise<void> {
       }
     },
   };
-}
+};

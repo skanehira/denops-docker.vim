@@ -1,5 +1,5 @@
+import { assertEquals } from "jsr:@std/assert@1.0.11";
 import { buildDockerCommand } from "./util.ts";
-import { assertEquals } from "./deps.ts";
 
 {
   const tests = [

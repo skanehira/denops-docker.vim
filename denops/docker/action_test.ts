@@ -1,4 +1,4 @@
-import { assertEquals } from "./deps.ts";
+import { assertEquals } from "jsr:@std/assert@1.0.11";
 import * as action from "./action.ts";
 import * as socket from "./socket.ts";
 
