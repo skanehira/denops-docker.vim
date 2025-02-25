@@ -1,6 +1,7 @@
 import { Buffer } from "jsr:@std/io@0.225.2/buffer";
-import { BufReader, TextProtoReader } from "./deps_deprecated.ts";
 import { connect } from "./socket.ts";
+import { TextProtoReader } from "https://deno.land/std@0.155.0/textproto/mod.ts";
+import { BufReader } from "https://deno.land/std@0.155.0/io/buffer.ts";
 
 export interface Request {
   url: string;
@@ -100,7 +101,7 @@ export function newRequest(req: Request): string {
 
   // NOTE(skanehira): docker will be slow without user agent header
   // ref: https://github.com/moby/moby/issues/47439
-  header += `User-Agent: Docker-Client/25.0.3\r\n`
+  header += `User-Agent: Docker-Client/25.0.3\r\n`;
 
   let reqStr = `${header}\r\n`;
   if ("data" in req) {
