@@ -1,0 +1,13 @@
+{
+  "lock": false,
+  "exclude": [
+    "cov/**"
+  ],
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-import-prefix"
+      ]
+    }
+  }
+}
